@@ -1,17 +1,24 @@
 import { Link } from 'expo-router';
-import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { CmcCoin, getUsdQuote } from '../lib/coinmarketcap';
+import React, { useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { CmcCoin, getCoinLogoUrl, getUsdQuote } from '../lib/coinmarketcap';
 import { formatPercent, formatPrice } from '../lib/format';
 import { FavoriteButton } from './FavoriteButton';
 
 export function CoinRow({ coin }: { coin: CmcCoin }) {
   const quote = getUsdQuote(coin);
+  const [logoFailed, setLogoFailed] = useState(false);
 
   return (
     <Link href={`/coin/${coin.id}`} asChild>
       <Pressable style={styles.row}>
-        <Text style={styles.rank}>{coin.cmc_rank}</Text>
+        {logoFailed ? (
+          <View style={styles.logoFallback}>
+            <Text style={styles.logoFallbackText}>{coin.symbol.charAt(0)}</Text>
+          </View>
+        ) : (
+          <Image source={{ uri: getCoinLogoUrl(coin.id) }} style={styles.logo} onError={() => setLogoFailed(true)} />
+        )}
         <View style={styles.nameColumn}>
           <Text style={styles.name} numberOfLines={1}>
             {coin.name}
@@ -40,8 +47,17 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: '#fff',
   },
-  rank: { width: 28, fontSize: 13, color: '#999' },
-  nameColumn: { flex: 1, marginLeft: 8 },
+  logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f0f0f0' },
+  logoFallback: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#eee',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoFallbackText: { fontSize: 12, fontWeight: '700', color: '#888' },
+  nameColumn: { flex: 1, marginLeft: 10 },
   name: { fontSize: 15, fontWeight: '600' },
   symbol: { fontSize: 13, color: '#888', marginTop: 2 },
   priceColumn: { alignItems: 'flex-end' },

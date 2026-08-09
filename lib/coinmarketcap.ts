@@ -87,6 +87,12 @@ export function getUsdQuote(coin: CmcCoin): CmcQuote | undefined {
   return coin.quote.find((quote) => quote.symbol === 'USD');
 }
 
+// CMC serves coin logos from a static CDN keyed only by id — no API call or
+// key needed (confirmed live: works unauthenticated, 403s for unknown ids).
+export function getCoinLogoUrl(coinId: number): string {
+  return `https://s2.coinmarketcap.com/static/img/coins/64x64/${coinId}.png`;
+}
+
 export async function fetchCoinListings({
   start,
   limit,
