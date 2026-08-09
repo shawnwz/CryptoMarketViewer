@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { FavoritesProvider } from '../contexts/FavoritesContext';
 
 function RootNavigator() {
   const { session, loading } = useAuth();
@@ -23,6 +24,7 @@ function RootNavigator() {
       <Stack.Protected guard={!!session}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="settings" options={{ presentation: 'modal', title: 'Settings' }} />
+        <Stack.Screen name="coin/[id]" options={{ title: '' }} />
       </Stack.Protected>
     </Stack>
   );
@@ -31,8 +33,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootNavigator />
-      <StatusBar style="auto" />
+      <FavoritesProvider>
+        <RootNavigator />
+        <StatusBar style="auto" />
+      </FavoritesProvider>
     </AuthProvider>
   );
 }

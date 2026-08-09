@@ -1,52 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { CmcCoin, fetchCoinListings, getUsdQuote } from '../../lib/coinmarketcap';
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { CoinRow } from '../../components/CoinRow';
+import { CmcCoin, fetchCoinListings } from '../../lib/coinmarketcap';
 
 const PAGE_SIZE = 10;
-
-function formatPrice(price: number): string {
-  return price.toLocaleString('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: price < 1 ? 4 : 2,
-    maximumFractionDigits: price < 1 ? 6 : 2,
-  });
-}
-
-function formatPercent(percent: number): string {
-  return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
-}
-
-function CoinRow({ coin }: { coin: CmcCoin }) {
-  const quote = getUsdQuote(coin);
-
-  return (
-    <View style={styles.row}>
-      <Text style={styles.rank}>{coin.cmc_rank}</Text>
-      <View style={styles.nameColumn}>
-        <Text style={styles.name} numberOfLines={1}>
-          {coin.name}
-        </Text>
-        <Text style={styles.symbol}>{coin.symbol}</Text>
-      </View>
-      <View style={styles.priceColumn}>
-        <Text style={styles.price}>{quote ? formatPrice(quote.price) : '—'}</Text>
-        {quote ? (
-          <Text style={[styles.change, quote.percent_change_24h >= 0 ? styles.positive : styles.negative]}>
-            {formatPercent(quote.percent_change_24h)}
-          </Text>
-        ) : null}
-      </View>
-    </View>
-  );
-}
 
 export default function MarketScreen() {
   const [coins, setCoins] = useState<CmcCoin[]>([]);
@@ -138,22 +95,6 @@ const styles = StyleSheet.create({
   errorText: { color: '#dc2626', textAlign: 'center', marginBottom: 16 },
   retryButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
   retryButtonText: { color: '#fff', fontWeight: '600' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  rank: { width: 28, fontSize: 13, color: '#999' },
-  nameColumn: { flex: 1, marginLeft: 8 },
-  name: { fontSize: 15, fontWeight: '600' },
-  symbol: { fontSize: 13, color: '#888', marginTop: 2 },
-  priceColumn: { alignItems: 'flex-end' },
-  price: { fontSize: 15, fontWeight: '600' },
-  change: { fontSize: 13, marginTop: 2 },
-  positive: { color: '#16a34a' },
-  negative: { color: '#dc2626' },
   separator: { height: 1, backgroundColor: '#eee', marginLeft: 16 },
   footer: { paddingVertical: 20 },
 });
