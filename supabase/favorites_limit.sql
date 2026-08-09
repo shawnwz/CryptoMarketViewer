@@ -1,8 +1,3 @@
--- Run this once in your Supabase project's SQL editor, after favorites.sql.
--- Belt-and-braces cap to match FAVORITES_LIMIT in lib/favorites.ts: the app
--- checks this client-side too, but a DB-level trigger enforces it regardless
--- of which client is inserting.
-
 create or replace function public.enforce_favorites_limit()
 returns trigger
 language plpgsql

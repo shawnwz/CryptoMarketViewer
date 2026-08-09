@@ -1,6 +1,3 @@
--- Run this once in your Supabase project's SQL editor
--- (Dashboard -> SQL Editor -> New query -> paste -> Run).
-
 create table if not exists public.favorites (
   user_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   coin_id integer not null,
