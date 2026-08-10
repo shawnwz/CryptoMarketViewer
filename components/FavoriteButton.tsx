@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
-import { Alert, Pressable, StyleProp, ViewStyle } from 'react-native';
-import { useFavorites } from '../contexts/FavoritesContext';
+import React, { useState } from 'react';
+import { Pressable, StyleProp, ViewStyle } from 'react-native';
+import { useFavoriteLists } from '../contexts/FavoriteListsContext';
 import type { CmcCoin } from '../lib/coinmarketcap';
+import { AddToListSheet } from './AddToListSheet';
 
 type Props = {
   coin: Pick<CmcCoin, 'id' | 'symbol' | 'name'>;
@@ -11,19 +12,16 @@ type Props = {
 };
 
 export function FavoriteButton({ coin, size = 22, style }: Props) {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const favorite = isFavorite(coin.id);
-
-  const handlePress = async () => {
-    const { error } = await toggleFavorite(coin);
-    if (error) {
-      Alert.alert('Could not update favorites', error);
-    }
-  };
+  const { listsForCoin } = useFavoriteLists();
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const isFavorite = listsForCoin(coin.id).length > 0;
 
   return (
-    <Pressable onPress={handlePress} hitSlop={10} style={style}>
-      <Ionicons name={favorite ? 'star' : 'star-outline'} size={size} color={favorite ? '#f59e0b' : '#999'} />
-    </Pressable>
+    <>
+      <Pressable onPress={() => setSheetVisible(true)} hitSlop={10} style={style}>
+        <Ionicons name={isFavorite ? 'star' : 'star-outline'} size={size} color={isFavorite ? '#f59e0b' : '#999'} />
+      </Pressable>
+      <AddToListSheet visible={sheetVisible} coin={coin} onClose={() => setSheetVisible(false)} />
+    </>
   );
 }

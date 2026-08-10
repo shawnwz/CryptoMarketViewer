@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { CoinRow } from '../../components/CoinRow';
 import { CmcCoin, fetchCoinListings } from '../../lib/coinmarketcap';
 
@@ -9,13 +9,14 @@ export default function MarketScreen() {
   const [coins, setCoins] = useState<CmcCoin[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const nextStartRef = useRef(1);
   const loadingMoreRef = useRef(false);
 
-  const loadInitial = useCallback(async () => {
-    setLoading(true);
+  const loadInitial = useCallback(async (isRefresh = false) => {
+    isRefresh ? setRefreshing(true) : setLoading(true);
     setError(null);
     nextStartRef.current = 1;
     try {
@@ -27,6 +28,7 @@ export default function MarketScreen() {
       setError(e instanceof Error ? e.message : 'Failed to load cryptocurrencies');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -63,7 +65,7 @@ export default function MarketScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
-        <Pressable style={styles.retryButton} onPress={loadInitial}>
+        <Pressable style={styles.retryButton} onPress={() => loadInitial()}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </Pressable>
       </View>
@@ -78,6 +80,7 @@ export default function MarketScreen() {
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadInitial(true)} />}
       ListFooterComponent={
         loadingMore ? (
           <View style={styles.footer}>

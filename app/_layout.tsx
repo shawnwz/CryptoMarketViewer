@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
-import { FavoritesProvider } from '../contexts/FavoritesContext';
+import { FavoriteListsProvider } from '../contexts/FavoriteListsContext';
 
 function RootNavigator() {
   const { session, loading } = useAuth();
@@ -33,10 +33,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <FavoritesProvider>
+      <FavoriteListsProvider>
         <RootNavigator />
         <StatusBar style="auto" />
-      </FavoritesProvider>
+      </FavoriteListsProvider>
     </AuthProvider>
   );
 }
