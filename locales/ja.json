@@ -1,0 +1,118 @@
+{
+  "common": {
+    "cancel": "キャンセル",
+    "save": "保存",
+    "create": "作成",
+    "retry": "再試行",
+    "searchCoinsPlaceholder": "コインを検索",
+    "noCoinsFound": "コインが見つかりません",
+    "failedToLoadCoinList": "コイン一覧の読み込みに失敗しました",
+    "searchFailed": "検索に失敗しました",
+    "somethingWentWrong": "問題が発生しました",
+    "couldNotCreateList": "リストを作成できませんでした"
+  },
+  "tabs": {
+    "market": "マーケット",
+    "search": "検索",
+    "favorites": "お気に入り",
+    "news": "ニュース",
+    "portfolio": "ポートフォリオ"
+  },
+  "auth": {
+    "logIn": "ログイン",
+    "signUp": "新規登録",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "confirmPassword": "パスワード（確認）",
+    "noAccount": "アカウントをお持ちでないですか？新規登録",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？ログイン",
+    "passwordMismatch": "パスワードが一致しません",
+    "accountCreated": "アカウントを作成しました。ログインする前にメールを確認してください。"
+  },
+  "settings": {
+    "title": "設定",
+    "loggedInAs": "{{email}} でログイン中",
+    "logOut": "ログアウト",
+    "language": "言語"
+  },
+  "market": {
+    "failedToLoad": "暗号資産の読み込みに失敗しました",
+    "failedToLoadMore": "追加の暗号資産の読み込みに失敗しました"
+  },
+  "search": {
+    "searchHistory": "検索履歴",
+    "clearHistoryTitle": "検索履歴を削除しますか？",
+    "clear": "削除",
+    "recentSearchesEmpty": "最近の検索がここに表示されます"
+  },
+  "favorites": {
+    "noListsYet": "リストがまだありません",
+    "createListPrompt": "リストを作成してコインの保存を始めましょう",
+    "createList": "リストを作成",
+    "noCoinsInList": "「{{name}}」にコインがありません",
+    "tapStarPrompt": "コインの星マークをタップして追加できます",
+    "failedToLoad": "お気に入りの読み込みに失敗しました",
+    "deleteListTitle": "このリストを削除しますか？",
+    "deleteListMessage": "「{{name}}」と保存されたコインが削除されます。",
+    "delete": "削除",
+    "rename": "名前を変更",
+    "couldNotRenameList": "リスト名を変更できませんでした",
+    "newListTitle": "新しいリスト",
+    "renameListTitle": "リスト名を変更",
+    "listNamePlaceholder": "リスト名"
+  },
+  "addToList": {
+    "title": "{{symbol}} をリストに追加",
+    "empty": "リストがまだありません — 下から最初のリストを作成しましょう。",
+    "newList": "新しいリスト",
+    "couldNotUpdateList": "リストを更新できませんでした"
+  },
+  "news": {
+    "failedToLoad": "ニュースの読み込みに失敗しました",
+    "failedToLoadMore": "追加のニュースの読み込みに失敗しました",
+    "sentimentPositive": "ポジティブ",
+    "sentimentNegative": "ネガティブ",
+    "sentimentNeutral": "中立"
+  },
+  "portfolio": {
+    "totalValue": "総資産額",
+    "noHoldingsYet": "保有コインがまだありません",
+    "addCoinPrompt": "コインを追加してポートフォリオの記録を始めましょう",
+    "failedToLoad": "ポートフォリオの読み込みに失敗しました",
+    "enterValidQuantity": "有効な数量を入力してください",
+    "couldNotUpdateHolding": "保有コインを更新できませんでした",
+    "couldNotDeleteHolding": "保有コインを削除できませんでした",
+    "removeHoldingTitle": "この保有コインを削除しますか？",
+    "removeHoldingMessage": "ポートフォリオから {{name}} が削除されます。",
+    "remove": "削除",
+    "quantityPlaceholder": "数量",
+    "addHolding": "保有コインを追加",
+    "enterQuantity": "数量を入力",
+    "searchForCoinToAdd": "追加するコインを検索",
+    "addToPortfolio": "ポートフォリオに追加",
+    "couldNotAddHolding": "保有コインを追加できませんでした"
+  },
+  "coin": {
+    "rank": "ランク #{{rank}}",
+    "marketCap": "時価総額",
+    "marketCapDominance": "市場占有率",
+    "fullyDilutedMarketCap": "完全希薄化時価総額",
+    "volume24h": "24時間取引量",
+    "circulatingSupply": "循環供給量",
+    "totalSupply": "総供給量",
+    "maxSupply": "最大供給量",
+    "about": "{{name}} について",
+    "added": "登録日 {{date}}",
+    "links": "リンク",
+    "website": "公式サイト",
+    "explorer": "エクスプローラー",
+    "sourceCode": "ソースコード",
+    "whitepaper": "ホワイトペーパー",
+    "reddit": "Reddit",
+    "twitter": "Twitter",
+    "notFound": "コインが見つかりません",
+    "notEnoughData": "チャートを表示するデータが不足しています",
+    "low": "安値",
+    "high": "高値"
+  }
+}

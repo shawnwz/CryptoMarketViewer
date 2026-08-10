@@ -1,12 +1,14 @@
 import { Link } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { CmcCoin, getCoinLogoUrl, getUsdQuote } from '../lib/coinmarketcap';
+import { useLanguage } from '../contexts/LanguageContext';
+import { CmcCoin, getCoinLogoUrl, getQuote } from '../lib/coinmarketcap';
 import { formatPercent, formatPrice } from '../lib/format';
 import { FavoriteButton } from './FavoriteButton';
 
 export function CoinRow({ coin, onPress }: { coin: CmcCoin; onPress?: () => void }) {
-  const quote = getUsdQuote(coin);
+  const { currency } = useLanguage();
+  const quote = getQuote(coin, currency);
   const [logoFailed, setLogoFailed] = useState(false);
 
   return (

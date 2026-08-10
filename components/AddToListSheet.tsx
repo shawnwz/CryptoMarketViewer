@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFavoriteLists } from '../contexts/FavoriteListsContext';
 import type { CmcCoin } from '../lib/coinmarketcap';
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export function AddToListSheet({ visible, coin, onClose }: Props) {
+  const { t } = useTranslation();
   const { lists, isInList, toggleCoinInList, createList } = useFavoriteLists();
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -21,13 +23,13 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
     setTogglingId(list.id);
     const { error } = await toggleCoinInList(list.id, coin);
     setTogglingId(null);
-    if (error) Alert.alert('Could not update list', error);
+    if (error) Alert.alert(t('addToList.couldNotUpdateList'), error);
   };
 
   const handleCreate = async (name: string) => {
     const { list, error } = await createList(name);
     if (error) {
-      Alert.alert('Could not create list', error);
+      Alert.alert(t('common.couldNotCreateList'), error);
     } else if (list) {
       await toggleCoinInList(list.id, coin);
     }
@@ -40,7 +42,7 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         <View style={styles.sheet}>
           <View style={styles.header}>
-            <Text style={styles.title}>Add {coin.symbol} to list</Text>
+            <Text style={styles.title}>{t('addToList.title', { symbol: coin.symbol })}</Text>
             <Pressable onPress={onClose} hitSlop={8}>
               <Ionicons name="close" size={22} color="#111" />
             </Pressable>
@@ -50,9 +52,7 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
             data={lists}
             keyExtractor={(item) => item.id}
             style={styles.list}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>No lists yet — create your first one below.</Text>
-            }
+            ListEmptyComponent={<Text style={styles.emptyText}>{t('addToList.empty')}</Text>}
             renderItem={({ item }) => {
               const inList = isInList(item.id, coin.id);
               return (
@@ -74,15 +74,16 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
 
           <Pressable style={styles.newListButton} onPress={() => setCreating(true)}>
             <Ionicons name="add" size={18} color="#2563eb" />
-            <Text style={styles.newListButtonText}>New list</Text>
+            <Text style={styles.newListButtonText}>{t('addToList.newList')}</Text>
           </Pressable>
         </View>
       </View>
 
       <TextPromptModal
         visible={creating}
-        title="New list"
-        confirmLabel="Create"
+        title={t('addToList.newList')}
+        confirmLabel={t('common.create')}
+        placeholder={t('favorites.listNamePlaceholder')}
         onCancel={() => setCreating(false)}
         onSubmit={handleCreate}
       />

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -14,11 +15,14 @@ import {
 import { CoinRow } from '../../components/CoinRow';
 import { TextPromptModal } from '../../components/TextPromptModal';
 import { useFavoriteLists } from '../../contexts/FavoriteListsContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { CmcCoin, fetchCoinQuotes } from '../../lib/coinmarketcap';
 
 type PromptMode = 'create' | 'rename' | null;
 
 export default function FavoritesScreen() {
+  const { t } = useTranslation();
+  const { currency } = useLanguage();
   const { lists, listCoins, loading: listsLoading, createList, renameList, deleteList } = useFavoriteLists();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [coins, setCoins] = useState<CmcCoin[]>([]);
@@ -67,17 +71,17 @@ export default function FavoritesScreen() {
       isRefresh ? setRefreshing(true) : setLoadingCoins(true);
       setError(null);
       try {
-        const data = await fetchCoinQuotes(coinIdsInSelectedList);
+        const data = await fetchCoinQuotes(coinIdsInSelectedList, currency);
         const byId = new Map(data.map((coin) => [coin.id, coin]));
         setCoins(coinIdsInSelectedList.map((id) => byId.get(id)).filter((c): c is CmcCoin => c != null));
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Failed to load favorites');
+        setError(e instanceof Error ? e.message : t('favorites.failedToLoad'));
       } finally {
         setLoadingCoins(false);
         setRefreshing(false);
       }
     },
-    [selectedListId, coinIdsInSelectedList]
+    [selectedListId, coinIdsInSelectedList, t, currency]
   );
 
   useEffect(() => {
@@ -91,33 +95,33 @@ export default function FavoritesScreen() {
     if (!list) return;
     Alert.alert(list.name, undefined, [
       {
-        text: 'Rename',
+        text: t('favorites.rename'),
         onPress: () => {
           setSelectedListId(listId);
           setPromptMode('rename');
         },
       },
       {
-        text: 'Delete',
+        text: t('favorites.delete'),
         style: 'destructive',
         onPress: () =>
-          Alert.alert('Delete list?', `This removes "${list.name}" and its saved coins.`, [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => deleteList(listId) },
+          Alert.alert(t('favorites.deleteListTitle'), t('favorites.deleteListMessage', { name: list.name }), [
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('favorites.delete'), style: 'destructive', onPress: () => deleteList(listId) },
           ]),
       },
-      { text: 'Cancel', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
     ]);
   };
 
   const handlePromptSubmit = async (value: string) => {
     if (promptMode === 'create') {
       const { list, error: createError } = await createList(value);
-      if (createError) Alert.alert('Could not create list', createError);
+      if (createError) Alert.alert(t('common.couldNotCreateList'), createError);
       else if (list) setSelectedListId(list.id);
     } else if (promptMode === 'rename' && selectedListId) {
       const { error: renameError } = await renameList(selectedListId, value);
-      if (renameError) Alert.alert('Could not rename list', renameError);
+      if (renameError) Alert.alert(t('favorites.couldNotRenameList'), renameError);
     }
     setPromptMode(null);
   };
@@ -164,10 +168,10 @@ export default function FavoritesScreen() {
       {lists.length === 0 ? (
         <View style={styles.center}>
           <Ionicons name="albums-outline" size={40} color="#ccc" />
-          <Text style={styles.emptyTitle}>No lists yet</Text>
-          <Text style={styles.emptySubtitle}>Create a list to start saving coins</Text>
+          <Text style={styles.emptyTitle}>{t('favorites.noListsYet')}</Text>
+          <Text style={styles.emptySubtitle}>{t('favorites.createListPrompt')}</Text>
           <Pressable style={styles.createFirstButton} onPress={() => setPromptMode('create')}>
-            <Text style={styles.createFirstButtonText}>Create a list</Text>
+            <Text style={styles.createFirstButtonText}>{t('favorites.createList')}</Text>
           </Pressable>
         </View>
       ) : loadingCoins ? (
@@ -181,8 +185,8 @@ export default function FavoritesScreen() {
       ) : coins.length === 0 ? (
         <View style={styles.center}>
           <Ionicons name="star-outline" size={40} color="#ccc" />
-          <Text style={styles.emptyTitle}>No coins in &quot;{selectedList?.name}&quot;</Text>
-          <Text style={styles.emptySubtitle}>Tap the star on any coin to add it here</Text>
+          <Text style={styles.emptyTitle}>{t('favorites.noCoinsInList', { name: selectedList?.name })}</Text>
+          <Text style={styles.emptySubtitle}>{t('favorites.tapStarPrompt')}</Text>
         </View>
       ) : (
         <FlatList
@@ -198,9 +202,10 @@ export default function FavoritesScreen() {
 
       <TextPromptModal
         visible={promptMode != null}
-        title={promptMode === 'rename' ? 'Rename list' : 'New list'}
+        title={promptMode === 'rename' ? t('favorites.renameListTitle') : t('favorites.newListTitle')}
         initialValue={promptMode === 'rename' ? selectedList?.name ?? '' : ''}
-        confirmLabel={promptMode === 'rename' ? 'Rename' : 'Create'}
+        confirmLabel={promptMode === 'rename' ? t('favorites.rename') : t('common.create')}
+        placeholder={t('favorites.listNamePlaceholder')}
         onCancel={() => setPromptMode(null)}
         onSubmit={handlePromptSubmit}
       />

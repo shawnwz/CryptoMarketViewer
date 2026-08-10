@@ -1,0 +1,118 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "retry": "Retry",
+    "searchCoinsPlaceholder": "Search coins",
+    "noCoinsFound": "No coins found",
+    "failedToLoadCoinList": "Failed to load coin list",
+    "searchFailed": "Search failed",
+    "somethingWentWrong": "Something went wrong",
+    "couldNotCreateList": "Could not create list"
+  },
+  "tabs": {
+    "market": "Market",
+    "search": "Search",
+    "favorites": "Favorites",
+    "news": "News",
+    "portfolio": "Portfolio"
+  },
+  "auth": {
+    "logIn": "Log in",
+    "signUp": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "noAccount": "Don't have an account? Sign up",
+    "alreadyHaveAccount": "Already have an account? Log in",
+    "passwordMismatch": "Passwords do not match",
+    "accountCreated": "Account created. Check your email to confirm before logging in."
+  },
+  "settings": {
+    "title": "Settings",
+    "loggedInAs": "Logged in as {{email}}",
+    "logOut": "Log out",
+    "language": "Language"
+  },
+  "market": {
+    "failedToLoad": "Failed to load cryptocurrencies",
+    "failedToLoadMore": "Failed to load more cryptocurrencies"
+  },
+  "search": {
+    "searchHistory": "Search History",
+    "clearHistoryTitle": "Clear search history?",
+    "clear": "Clear",
+    "recentSearchesEmpty": "Your recent searches will show up here"
+  },
+  "favorites": {
+    "noListsYet": "No lists yet",
+    "createListPrompt": "Create a list to start saving coins",
+    "createList": "Create a list",
+    "noCoinsInList": "No coins in \"{{name}}\"",
+    "tapStarPrompt": "Tap the star on any coin to add it here",
+    "failedToLoad": "Failed to load favorites",
+    "deleteListTitle": "Delete list?",
+    "deleteListMessage": "This removes \"{{name}}\" and its saved coins.",
+    "delete": "Delete",
+    "rename": "Rename",
+    "couldNotRenameList": "Could not rename list",
+    "newListTitle": "New list",
+    "renameListTitle": "Rename list",
+    "listNamePlaceholder": "List name"
+  },
+  "addToList": {
+    "title": "Add {{symbol}} to list",
+    "empty": "No lists yet — create your first one below.",
+    "newList": "New list",
+    "couldNotUpdateList": "Could not update list"
+  },
+  "news": {
+    "failedToLoad": "Failed to load news",
+    "failedToLoadMore": "Failed to load more news",
+    "sentimentPositive": "Positive",
+    "sentimentNegative": "Negative",
+    "sentimentNeutral": "Neutral"
+  },
+  "portfolio": {
+    "totalValue": "Total value",
+    "noHoldingsYet": "No holdings yet",
+    "addCoinPrompt": "Add a coin to start tracking your portfolio",
+    "failedToLoad": "Failed to load portfolio",
+    "enterValidQuantity": "Enter a valid quantity",
+    "couldNotUpdateHolding": "Could not update holding",
+    "couldNotDeleteHolding": "Could not delete holding",
+    "removeHoldingTitle": "Remove holding?",
+    "removeHoldingMessage": "This removes {{name}} from your portfolio.",
+    "remove": "Remove",
+    "quantityPlaceholder": "Quantity",
+    "addHolding": "Add holding",
+    "enterQuantity": "Enter quantity",
+    "searchForCoinToAdd": "Search for a coin to add",
+    "addToPortfolio": "Add to portfolio",
+    "couldNotAddHolding": "Could not add holding"
+  },
+  "coin": {
+    "rank": "Rank #{{rank}}",
+    "marketCap": "Market cap",
+    "marketCapDominance": "Market cap dominance",
+    "fullyDilutedMarketCap": "Fully diluted market cap",
+    "volume24h": "Volume (24h)",
+    "circulatingSupply": "Circulating supply",
+    "totalSupply": "Total supply",
+    "maxSupply": "Max supply",
+    "about": "About {{name}}",
+    "added": "Added {{date}}",
+    "links": "Links",
+    "website": "Website",
+    "explorer": "Explorer",
+    "sourceCode": "Source code",
+    "whitepaper": "Whitepaper",
+    "reddit": "Reddit",
+    "twitter": "Twitter",
+    "notFound": "Coin not found",
+    "notEnoughData": "Not enough data to chart",
+    "low": "Low",
+    "high": "High"
+  }
+}

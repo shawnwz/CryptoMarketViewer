@@ -1,0 +1,118 @@
+{
+  "common": {
+    "cancel": "取消",
+    "save": "保存",
+    "create": "创建",
+    "retry": "重试",
+    "searchCoinsPlaceholder": "搜索币种",
+    "noCoinsFound": "未找到币种",
+    "failedToLoadCoinList": "加载币种列表失败",
+    "searchFailed": "搜索失败",
+    "somethingWentWrong": "出现错误",
+    "couldNotCreateList": "无法创建列表"
+  },
+  "tabs": {
+    "market": "行情",
+    "search": "搜索",
+    "favorites": "收藏",
+    "news": "资讯",
+    "portfolio": "持仓"
+  },
+  "auth": {
+    "logIn": "登录",
+    "signUp": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "noAccount": "还没有账号？去注册",
+    "alreadyHaveAccount": "已有账号？去登录",
+    "passwordMismatch": "两次输入的密码不一致",
+    "accountCreated": "账号已创建，请查收邮件确认后再登录。"
+  },
+  "settings": {
+    "title": "设置",
+    "loggedInAs": "已登录：{{email}}",
+    "logOut": "退出登录",
+    "language": "语言"
+  },
+  "market": {
+    "failedToLoad": "加载加密货币失败",
+    "failedToLoadMore": "加载更多加密货币失败"
+  },
+  "search": {
+    "searchHistory": "搜索历史",
+    "clearHistoryTitle": "清除搜索历史？",
+    "clear": "清除",
+    "recentSearchesEmpty": "你的最近搜索会显示在这里"
+  },
+  "favorites": {
+    "noListsYet": "还没有列表",
+    "createListPrompt": "创建一个列表来开始收藏币种",
+    "createList": "创建列表",
+    "noCoinsInList": "「{{name}}」中还没有币种",
+    "tapStarPrompt": "点击任意币种的星标即可添加到这里",
+    "failedToLoad": "加载收藏失败",
+    "deleteListTitle": "删除该列表？",
+    "deleteListMessage": "这将删除「{{name}}」及其中保存的币种。",
+    "delete": "删除",
+    "rename": "重命名",
+    "couldNotRenameList": "无法重命名列表",
+    "newListTitle": "新建列表",
+    "renameListTitle": "重命名列表",
+    "listNamePlaceholder": "列表名称"
+  },
+  "addToList": {
+    "title": "将 {{symbol}} 添加到列表",
+    "empty": "还没有列表 — 在下方创建第一个吧。",
+    "newList": "新建列表",
+    "couldNotUpdateList": "无法更新列表"
+  },
+  "news": {
+    "failedToLoad": "加载资讯失败",
+    "failedToLoadMore": "加载更多资讯失败",
+    "sentimentPositive": "利好",
+    "sentimentNegative": "利空",
+    "sentimentNeutral": "中性"
+  },
+  "portfolio": {
+    "totalValue": "总资产",
+    "noHoldingsYet": "还没有持仓",
+    "addCoinPrompt": "添加一个币种开始记录你的持仓",
+    "failedToLoad": "加载持仓失败",
+    "enterValidQuantity": "请输入有效的数量",
+    "couldNotUpdateHolding": "无法更新持仓",
+    "couldNotDeleteHolding": "无法删除持仓",
+    "removeHoldingTitle": "删除该持仓？",
+    "removeHoldingMessage": "这将从你的持仓中移除 {{name}}。",
+    "remove": "移除",
+    "quantityPlaceholder": "数量",
+    "addHolding": "添加持仓",
+    "enterQuantity": "输入数量",
+    "searchForCoinToAdd": "搜索要添加的币种",
+    "addToPortfolio": "添加到持仓",
+    "couldNotAddHolding": "无法添加持仓"
+  },
+  "coin": {
+    "rank": "排名 #{{rank}}",
+    "marketCap": "市值",
+    "marketCapDominance": "市值占比",
+    "fullyDilutedMarketCap": "完全稀释市值",
+    "volume24h": "24小时交易量",
+    "circulatingSupply": "流通供应量",
+    "totalSupply": "总供应量",
+    "maxSupply": "最大供应量",
+    "about": "关于 {{name}}",
+    "added": "收录于 {{date}}",
+    "links": "相关链接",
+    "website": "官网",
+    "explorer": "区块浏览器",
+    "sourceCode": "源代码",
+    "whitepaper": "白皮书",
+    "reddit": "Reddit",
+    "twitter": "Twitter",
+    "notFound": "未找到该币种",
+    "notEnoughData": "数据不足，无法绘制图表",
+    "low": "最低",
+    "high": "最高"
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
@@ -17,7 +18,15 @@ import { fetchNews, NewsArticle } from '../../lib/news';
 // anything higher returns a 403), so we page in chunks of 3 instead of 10.
 const PAGE_SIZE = 3;
 
+const SENTIMENT_KEYS: Record<string, string> = {
+  Positive: 'news.sentimentPositive',
+  Negative: 'news.sentimentNegative',
+  Neutral: 'news.sentimentNeutral',
+};
+
 function NewsCard({ article }: { article: NewsArticle }) {
+  const { t } = useTranslation();
+
   return (
     <Pressable style={styles.card} onPress={() => Linking.openURL(article.news_url)}>
       {article.image_url ? <Image source={{ uri: article.image_url }} style={styles.image} /> : null}
@@ -41,7 +50,7 @@ function NewsCard({ article }: { article: NewsArticle }) {
                   : styles.neutral,
             ]}
           >
-            {article.sentiment}
+            {t(SENTIMENT_KEYS[article.sentiment] ?? article.sentiment)}
           </Text>
         </View>
       </View>
@@ -50,6 +59,7 @@ function NewsCard({ article }: { article: NewsArticle }) {
 }
 
 export default function NewsScreen() {
+  const { t } = useTranslation();
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -69,12 +79,12 @@ export default function NewsScreen() {
       setHasMore(data.length === PAGE_SIZE);
       nextPageRef.current = 2;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load news');
+      setError(e instanceof Error ? e.message : t('news.failedToLoad'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadInitial();
@@ -90,12 +100,12 @@ export default function NewsScreen() {
       setHasMore(data.length === PAGE_SIZE);
       nextPageRef.current += 1;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load more news');
+      setError(e instanceof Error ? e.message : t('news.failedToLoadMore'));
     } finally {
       loadingMoreRef.current = false;
       setLoadingMore(false);
     }
-  }, [hasMore, loading]);
+  }, [hasMore, loading, t]);
 
   if (loading) {
     return (
@@ -110,7 +120,7 @@ export default function NewsScreen() {
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
         <Pressable style={styles.retryButton} onPress={() => loadInitial()}>
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text style={styles.retryButtonText}>{t('common.retry')}</Text>
         </Pressable>
       </View>
     );

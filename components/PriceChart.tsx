@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import type { CmcHistoricalPoint } from '../lib/coinmarketcap';
@@ -7,12 +8,13 @@ import { formatPrice } from '../lib/format';
 const CHART_HEIGHT = 180;
 
 export function PriceChart({ data }: { data: CmcHistoricalPoint[] }) {
+  const { t } = useTranslation();
   const [width, setWidth] = useState(0);
 
   if (data.length < 2) {
     return (
       <View style={styles.placeholder}>
-        <Text style={styles.placeholderText}>Not enough data to chart</Text>
+        <Text style={styles.placeholderText}>{t('coin.notEnoughData')}</Text>
       </View>
     );
   }
@@ -43,8 +45,12 @@ export function PriceChart({ data }: { data: CmcHistoricalPoint[] }) {
         ) : null}
       </View>
       <View style={styles.labelsRow}>
-        <Text style={styles.labelText}>Low {formatPrice(min)}</Text>
-        <Text style={styles.labelText}>High {formatPrice(max)}</Text>
+        <Text style={styles.labelText}>
+          {t('coin.low')} {formatPrice(min)}
+        </Text>
+        <Text style={styles.labelText}>
+          {t('coin.high')} {formatPrice(max)}
+        </Text>
       </View>
     </View>
   );

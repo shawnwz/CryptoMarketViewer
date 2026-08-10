@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Link } from 'expo-router';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { LanguagePicker } from '../../components/LanguagePicker';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +23,14 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Log in</Text>
+      <View style={styles.languageRow}>
+        <LanguagePicker />
+      </View>
+      <Text style={styles.title}>{t('auth.logIn')}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={t('auth.email')}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
@@ -33,7 +39,7 @@ export default function LoginScreen() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder={t('auth.password')}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -46,12 +52,12 @@ export default function LoginScreen() {
         onPress={handleSubmit}
         disabled={submitting}
       >
-        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Log in</Text>}
+        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('auth.logIn')}</Text>}
       </Pressable>
 
       <Link href="/(auth)/signup" asChild>
         <Pressable>
-          <Text style={styles.link}>Don't have an account? Sign up</Text>
+          <Text style={styles.link}>{t('auth.noAccount')}</Text>
         </Pressable>
       </Link>
     </View>
@@ -60,6 +66,7 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: '#fff' },
+  languageRow: { alignItems: 'center', marginBottom: 24 },
   title: { fontSize: 28, fontWeight: '700', marginBottom: 24, textAlign: 'center' },
   input: {
     borderWidth: 1,

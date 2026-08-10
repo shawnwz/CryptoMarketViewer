@@ -1,17 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { LanguagePicker } from '../components/LanguagePicker';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
       <Stack.Screen
         options={{
+          title: t('settings.title'),
           headerLeft: () => (
             <Pressable onPress={() => router.back()} hitSlop={8} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#111" />
@@ -19,10 +23,15 @@ export default function SettingsScreen() {
           ),
         }}
       />
-      <Text style={styles.text}>Logged in as {user?.email}</Text>
+      <Text style={styles.text}>{t('settings.loggedInAs', { email: user?.email })}</Text>
       <Pressable style={styles.button} onPress={signOut}>
-        <Text style={styles.buttonText}>Log out</Text>
+        <Text style={styles.buttonText}>{t('settings.logOut')}</Text>
       </Pressable>
+
+      <View style={styles.languageSection}>
+        <Text style={styles.languageLabel}>{t('settings.language')}</Text>
+        <LanguagePicker />
+      </View>
     </View>
   );
 }
@@ -33,4 +42,6 @@ const styles = StyleSheet.create({
   button: { backgroundColor: '#dc2626', borderRadius: 8, paddingVertical: 12, paddingHorizontal: 24 },
   buttonText: { color: '#fff', fontWeight: '600' },
   closeButton: { marginLeft: 16, padding: 4 },
+  languageSection: { marginTop: 40, alignItems: 'center', width: '100%' },
+  languageLabel: { fontSize: 13, color: '#888', marginBottom: 12 },
 });

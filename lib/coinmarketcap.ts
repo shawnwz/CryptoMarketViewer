@@ -83,8 +83,11 @@ export type CmcCoinInfo = {
   twitter_username: string;
 };
 
-export function getUsdQuote(coin: CmcCoin): CmcQuote | undefined {
-  return coin.quote.find((quote) => quote.symbol === 'USD');
+// Every fetch function below requests exactly one currency (this plan caps
+// `convert` at 1 option per request — confirmed live), so a coin's `quote`
+// array always contains exactly one entry: the currency that was requested.
+export function getQuote(coin: CmcCoin, currency: string): CmcQuote | undefined {
+  return coin.quote.find((quote) => quote.symbol === currency);
 }
 
 // CMC serves coin logos from a static CDN keyed only by id — no API call or
@@ -96,18 +99,22 @@ export function getCoinLogoUrl(coinId: number): string {
 export async function fetchCoinListings({
   start,
   limit,
+  convert,
 }: {
   start: number;
   limit: number;
+  convert: string;
 }): Promise<CmcCoin[]> {
   const body = await cmcFetch<{ data: CmcCoin[] }>(
-    `/v3/cryptocurrency/listings/latest?start=${start}&limit=${limit}`
+    `/v3/cryptocurrency/listings/latest?start=${start}&limit=${limit}&convert=${convert}`
   );
   return body.data;
 }
 
-export async function fetchCoinQuote(id: number): Promise<CmcCoin> {
-  const body = await cmcFetch<{ data: CmcCoin[] }>(`/v3/cryptocurrency/quotes/latest?id=${id}`);
+export async function fetchCoinQuote(id: number, convert: string): Promise<CmcCoin> {
+  const body = await cmcFetch<{ data: CmcCoin[] }>(
+    `/v3/cryptocurrency/quotes/latest?id=${id}&convert=${convert}`
+  );
   return body.data[0];
 }
 
@@ -115,9 +122,11 @@ export async function fetchCoinQuote(id: number): Promise<CmcCoin> {
 // about ordering (e.g. a favorites list) should re-sort by id themselves.
 // The API caps the `id` param at 400 comma-separated values (confirmed via a live 400/401 test);
 // callers passing more than that will need to chunk the requests.
-export async function fetchCoinQuotes(ids: number[]): Promise<CmcCoin[]> {
+export async function fetchCoinQuotes(ids: number[], convert: string): Promise<CmcCoin[]> {
   if (ids.length === 0) return [];
-  const body = await cmcFetch<{ data: CmcCoin[] }>(`/v3/cryptocurrency/quotes/latest?id=${ids.join(',')}`);
+  const body = await cmcFetch<{ data: CmcCoin[] }>(
+    `/v3/cryptocurrency/quotes/latest?id=${ids.join(',')}&convert=${convert}`
+  );
   return body.data;
 }
 
@@ -140,7 +149,8 @@ let coinMapPromise: Promise<CmcCoinMapEntry[]> | null = null;
 // endpoint costs 0 API credits (confirmed live) and caps at 5000 results
 // (also confirmed live: limit=10000 errors with "must be less than or equal
 // to 5000"), which covers every coin anyone would realistically search for.
-// Cached in memory for the app session since the list rarely changes.
+// Cached in memory for the app session since the list rarely changes (and
+// carries no price data, so it's unaffected by currency).
 export function fetchCoinMap(): Promise<CmcCoinMapEntry[]> {
   if (!coinMapPromise) {
     coinMapPromise = cmcFetch<{ data: CmcCoinMapEntry[] }>(
@@ -167,14 +177,16 @@ export async function fetchCoinHistory({
   id,
   interval,
   count,
+  convert,
 }: {
   id: number;
   interval: 'hourly' | 'daily';
   count: number;
+  convert: string;
 }): Promise<CmcHistoricalPoint[]> {
   const body = await cmcFetch<{
-    data: { quotes: { timestamp: string; quote: { USD: { price: number } } }[] };
-  }>(`/v2/cryptocurrency/quotes/historical?id=${id}&count=${count}&interval=${interval}`);
+    data: { quotes: { timestamp: string; quote: Record<string, { price: number }> }[] };
+  }>(`/v2/cryptocurrency/quotes/historical?id=${id}&count=${count}&interval=${interval}&convert=${convert}`);
 
-  return body.data.quotes.map((q) => ({ timestamp: q.timestamp, price: q.quote.USD.price }));
+  return body.data.quotes.map((q) => ({ timestamp: q.timestamp, price: q.quote[convert].price }));
 }

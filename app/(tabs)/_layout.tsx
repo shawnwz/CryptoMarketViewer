@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 export default function TabsLayout() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <Tabs
@@ -24,7 +26,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Market',
+          title: t('tabs.market'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="stats-chart-outline" color={color} size={size} />
           ),
@@ -34,24 +36,31 @@ export default function TabsLayout() {
         name="search"
         options={{
           headerShown: false,
-          title: 'Search',
+          title: t('tabs.search'),
           tabBarIcon: ({ color, size }) => <Ionicons name="search-outline" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="favorites"
         options={{
-          title: 'Favorites',
+          title: t('tabs.favorites'),
           tabBarIcon: ({ color, size }) => <Ionicons name="star-outline" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="news"
         options={{
-          title: 'News',
+          title: t('tabs.news'),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="newspaper-outline" color={color} size={size} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="portfolio"
+        options={{
+          title: t('tabs.portfolio'),
+          tabBarIcon: ({ color, size }) => <Ionicons name="wallet-outline" color={color} size={size} />,
         }}
       />
     </Tabs>

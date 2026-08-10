@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CoinRow } from '../../components/CoinRow';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { CmcCoin, CmcCoinMapEntry, fetchCoinMap, fetchCoinQuotes } from '../../lib/coinmarketcap';
 import { addSearchTerm, clearSearchHistory, getSearchHistory } from '../../lib/searchHistory';
 
@@ -20,6 +22,8 @@ const MAX_RESULTS = 30;
 const DEBOUNCE_MS = 300;
 
 export default function SearchScreen() {
+  const { t } = useTranslation();
+  const { currency } = useLanguage();
   const [query, setQuery] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [coinMap, setCoinMap] = useState<CmcCoinMapEntry[]>([]);
@@ -32,7 +36,7 @@ export default function SearchScreen() {
     getSearchHistory().then(setHistory);
     fetchCoinMap()
       .then(setCoinMap)
-      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to load coin list'));
+      .catch((e) => setError(e instanceof Error ? e.message : t('common.failedToLoadCoinList')));
   }, []);
 
   useEffect(() => {
@@ -59,11 +63,11 @@ export default function SearchScreen() {
       }
 
       try {
-        const quotes = await fetchCoinQuotes(matches.map((m) => m.id));
+        const quotes = await fetchCoinQuotes(matches.map((m) => m.id), currency);
         const byId = new Map(quotes.map((c) => [c.id, c]));
         setResults(matches.map((m) => byId.get(m.id)).filter((c): c is CmcCoin => c != null));
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Search failed');
+        setError(e instanceof Error ? e.message : t('common.searchFailed'));
       } finally {
         setSearching(false);
       }
@@ -72,7 +76,7 @@ export default function SearchScreen() {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [query, coinMap]);
+  }, [query, coinMap, currency]);
 
   const runSearch = (term: string) => {
     setQuery(term);
@@ -88,10 +92,10 @@ export default function SearchScreen() {
   };
 
   const handleClearHistory = () => {
-    Alert.alert('Clear search history?', undefined, [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('search.clearHistoryTitle'), undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
       {
-        text: 'Clear',
+        text: t('search.clear'),
         style: 'destructive',
         onPress: () => {
           clearSearchHistory();
@@ -108,7 +112,7 @@ export default function SearchScreen() {
           <Ionicons name="search" size={18} color="#999" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search coins"
+            placeholder={t('common.searchCoinsPlaceholder')}
             placeholderTextColor="#999"
             value={query}
             onChangeText={setQuery}
@@ -120,14 +124,14 @@ export default function SearchScreen() {
           />
         </View>
         <Pressable onPress={handleCancel} hitSlop={8}>
-          <Text style={styles.cancelText}>Cancel</Text>
+          <Text style={styles.cancelText}>{t('common.cancel')}</Text>
         </Pressable>
       </View>
 
       {query.trim().length === 0 ? (
         <View style={styles.historySection}>
           <View style={styles.historyHeader}>
-            <Text style={styles.historyTitle}>Search History</Text>
+            <Text style={styles.historyTitle}>{t('search.searchHistory')}</Text>
             {history.length > 0 ? (
               <Pressable onPress={handleClearHistory} hitSlop={8}>
                 <Ionicons name="trash-outline" size={20} color="#666" />
@@ -135,7 +139,7 @@ export default function SearchScreen() {
             ) : null}
           </View>
           {history.length === 0 ? (
-            <Text style={styles.emptyHistoryText}>Your recent searches will show up here</Text>
+            <Text style={styles.emptyHistoryText}>{t('search.recentSearchesEmpty')}</Text>
           ) : (
             <View style={styles.historyChips}>
               {history.map((term) => (
@@ -157,7 +161,7 @@ export default function SearchScreen() {
       ) : results.length === 0 ? (
         <View style={styles.center}>
           <Ionicons name="search-outline" size={40} color="#ccc" />
-          <Text style={styles.emptyTitle}>No coins found</Text>
+          <Text style={styles.emptyTitle}>{t('common.noCoinsFound')}</Text>
         </View>
       ) : (
         <FlatList

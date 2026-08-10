@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
   title: string;
   initialValue?: string;
   confirmLabel?: string;
+  placeholder?: string;
   onCancel: () => void;
   onSubmit: (value: string) => void | Promise<void>;
 };
@@ -14,10 +16,12 @@ export function TextPromptModal({
   visible,
   title,
   initialValue = '',
-  confirmLabel = 'Save',
+  confirmLabel,
+  placeholder,
   onCancel,
   onSubmit,
 }: Props) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(initialValue);
   const [submitting, setSubmitting] = useState(false);
 
@@ -45,11 +49,11 @@ export function TextPromptModal({
             autoFocus
             returnKeyType="done"
             onSubmitEditing={handleSubmit}
-            placeholder="List name"
+            placeholder={placeholder ?? t('favorites.listNamePlaceholder')}
           />
           <View style={styles.buttonRow}>
             <Pressable style={styles.cancelButton} onPress={onCancel}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </Pressable>
             <Pressable
               style={[styles.confirmButton, (!value.trim() || submitting) && styles.confirmButtonDisabled]}
@@ -59,7 +63,7 @@ export function TextPromptModal({
               {submitting ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Text style={styles.confirmButtonText}>{confirmLabel}</Text>
+                <Text style={styles.confirmButtonText}>{confirmLabel ?? t('common.save')}</Text>
               )}
             </Pressable>
           </View>

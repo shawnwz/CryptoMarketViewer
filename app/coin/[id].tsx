@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Image,
@@ -13,6 +14,7 @@ import {
 } from 'react-native';
 import { FavoriteButton } from '../../components/FavoriteButton';
 import { PriceChart } from '../../components/PriceChart';
+import { useLanguage } from '../../contexts/LanguageContext';
 import {
   CmcCoin,
   CmcCoinInfo,
@@ -20,7 +22,7 @@ import {
   fetchCoinHistory,
   fetchCoinInfo,
   fetchCoinQuote,
-  getUsdQuote,
+  getQuote,
 } from '../../lib/coinmarketcap';
 import {
   formatCompactCurrency,
@@ -30,7 +32,7 @@ import {
   formatPrice,
 } from '../../lib/format';
 
-type LinkItem = { label: string; url: string; icon: keyof typeof Ionicons.glyphMap };
+type LinkItem = { labelKey: string; url: string; icon: keyof typeof Ionicons.glyphMap };
 
 const RANGES: { label: string; interval: 'hourly' | 'daily'; count: number }[] = [
   { label: '1D', interval: 'hourly', count: 24 },
@@ -42,15 +44,20 @@ const RANGES: { label: string; interval: 'hourly' | 'daily'; count: number }[] =
 
 function getLinkItems(info: CmcCoinInfo): LinkItem[] {
   const items: LinkItem[] = [];
-  if (info.urls.website[0]) items.push({ label: 'Website', url: info.urls.website[0], icon: 'globe-outline' });
-  if (info.urls.explorer[0]) items.push({ label: 'Explorer', url: info.urls.explorer[0], icon: 'compass-outline' });
+  if (info.urls.website[0]) items.push({ labelKey: 'coin.website', url: info.urls.website[0], icon: 'globe-outline' });
+  if (info.urls.explorer[0])
+    items.push({ labelKey: 'coin.explorer', url: info.urls.explorer[0], icon: 'compass-outline' });
   if (info.urls.source_code[0])
-    items.push({ label: 'Source code', url: info.urls.source_code[0], icon: 'logo-github' });
+    items.push({ labelKey: 'coin.sourceCode', url: info.urls.source_code[0], icon: 'logo-github' });
   if (info.urls.technical_doc[0])
-    items.push({ label: 'Whitepaper', url: info.urls.technical_doc[0], icon: 'document-text-outline' });
-  if (info.urls.reddit[0]) items.push({ label: 'Reddit', url: info.urls.reddit[0], icon: 'logo-reddit' });
+    items.push({ labelKey: 'coin.whitepaper', url: info.urls.technical_doc[0], icon: 'document-text-outline' });
+  if (info.urls.reddit[0]) items.push({ labelKey: 'coin.reddit', url: info.urls.reddit[0], icon: 'logo-reddit' });
   if (info.twitter_username) {
-    items.push({ label: 'Twitter', url: `https://twitter.com/${info.twitter_username}`, icon: 'logo-twitter' });
+    items.push({
+      labelKey: 'coin.twitter',
+      url: `https://twitter.com/${info.twitter_username}`,
+      icon: 'logo-twitter',
+    });
   }
   return items;
 }
@@ -65,6 +72,8 @@ function StatRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function CoinDetailScreen() {
+  const { t } = useTranslation();
+  const { currency } = useLanguage();
   const { id } = useLocalSearchParams<{ id: string }>();
   const coinId = Number(id);
 
@@ -84,13 +93,16 @@ export default function CoinDetailScreen() {
       setLoading(true);
       setError(null);
       try {
-        const [quoteResult, infoResult] = await Promise.all([fetchCoinQuote(coinId), fetchCoinInfo(coinId)]);
+        const [quoteResult, infoResult] = await Promise.all([
+          fetchCoinQuote(coinId, currency),
+          fetchCoinInfo(coinId),
+        ]);
         if (cancelled) return;
         setCoin(quoteResult);
         setInfo(infoResult);
       } catch (e) {
         if (cancelled) return;
-        setError(e instanceof Error ? e.message : 'Failed to load coin');
+        setError(e instanceof Error ? e.message : t('coin.notFound'));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -100,7 +112,7 @@ export default function CoinDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [coinId]);
+  }, [coinId, currency]);
 
   useEffect(() => {
     let cancelled = false;
@@ -109,7 +121,12 @@ export default function CoinDetailScreen() {
     async function loadHistory() {
       setHistoryLoading(true);
       try {
-        const data = await fetchCoinHistory({ id: coinId, interval: range.interval, count: range.count });
+        const data = await fetchCoinHistory({
+          id: coinId,
+          interval: range.interval,
+          count: range.count,
+          convert: currency,
+        });
         if (!cancelled) setHistory(data);
       } catch {
         if (!cancelled) setHistory([]);
@@ -122,7 +139,7 @@ export default function CoinDetailScreen() {
     return () => {
       cancelled = true;
     };
-  }, [coinId, rangeIndex]);
+  }, [coinId, rangeIndex, currency]);
 
   if (loading) {
     return (
@@ -135,12 +152,12 @@ export default function CoinDetailScreen() {
   if (error || !coin || !info) {
     return (
       <View style={styles.center}>
-        <Text style={styles.errorText}>{error ?? 'Coin not found'}</Text>
+        <Text style={styles.errorText}>{error ?? t('coin.notFound')}</Text>
       </View>
     );
   }
 
-  const quote = getUsdQuote(coin);
+  const quote = getQuote(coin, currency);
   const links = getLinkItems(info);
   const changeItems = quote
     ? [
@@ -167,7 +184,7 @@ export default function CoinDetailScreen() {
         <View style={styles.headerText}>
           <Text style={styles.name}>{coin.name}</Text>
           <Text style={styles.symbol}>
-            {coin.symbol} · Rank #{coin.cmc_rank}
+            {coin.symbol} · {t('coin.rank', { rank: coin.cmc_rank })}
           </Text>
         </View>
       </View>
@@ -219,25 +236,37 @@ export default function CoinDetailScreen() {
 
       {quote ? (
         <View style={styles.statsGrid}>
-          <StatRow label="Market cap" value={formatCompactCurrency(quote.market_cap)} />
-          <StatRow label="Market cap dominance" value={`${quote.market_cap_dominance.toFixed(2)}%`} />
-          <StatRow label="Fully diluted market cap" value={formatCompactCurrency(quote.fully_diluted_market_cap)} />
+          <StatRow label={t('coin.marketCap')} value={formatCompactCurrency(quote.market_cap)} />
+          <StatRow label={t('coin.marketCapDominance')} value={`${quote.market_cap_dominance.toFixed(2)}%`} />
           <StatRow
-            label="Volume (24h)"
+            label={t('coin.fullyDilutedMarketCap')}
+            value={formatCompactCurrency(quote.fully_diluted_market_cap)}
+          />
+          <StatRow
+            label={t('coin.volume24h')}
             value={`${formatCompactCurrency(quote.volume_24h)} (${formatPercent(quote.volume_change_24h)})`}
           />
-          <StatRow label="Circulating supply" value={`${formatCompactNumber(coin.circulating_supply)} ${coin.symbol}`} />
-          <StatRow label="Total supply" value={`${formatCompactNumber(coin.total_supply)} ${coin.symbol}`} />
+          <StatRow
+            label={t('coin.circulatingSupply')}
+            value={`${formatCompactNumber(coin.circulating_supply)} ${coin.symbol}`}
+          />
+          <StatRow
+            label={t('coin.totalSupply')}
+            value={`${formatCompactNumber(coin.total_supply)} ${coin.symbol}`}
+          />
           {coin.max_supply != null ? (
-            <StatRow label="Max supply" value={`${formatCompactNumber(coin.max_supply)} ${coin.symbol}`} />
+            <StatRow
+              label={t('coin.maxSupply')}
+              value={`${formatCompactNumber(coin.max_supply)} ${coin.symbol}`}
+            />
           ) : null}
         </View>
       ) : null}
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>About {coin.name}</Text>
+        <Text style={styles.sectionTitle}>{t('coin.about', { name: coin.name })}</Text>
         <Text style={styles.description}>{info.description}</Text>
-        <Text style={styles.dateAdded}>Added {formatDate(info.date_added)}</Text>
+        <Text style={styles.dateAdded}>{t('coin.added', { date: formatDate(info.date_added) })}</Text>
 
         {info.tags.length > 0 ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsRow}>
@@ -252,11 +281,11 @@ export default function CoinDetailScreen() {
 
       {links.length > 0 ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Links</Text>
+          <Text style={styles.sectionTitle}>{t('coin.links')}</Text>
           {links.map((link) => (
-            <Pressable key={link.label} style={styles.linkRow} onPress={() => Linking.openURL(link.url)}>
+            <Pressable key={link.labelKey} style={styles.linkRow} onPress={() => Linking.openURL(link.url)}>
               <Ionicons name={link.icon} size={20} color="#2563eb" />
-              <Text style={styles.linkLabel}>{link.label}</Text>
+              <Text style={styles.linkLabel}>{t(link.labelKey)}</Text>
               <Ionicons name="open-outline" size={16} color="#999" />
             </Pressable>
           ))}

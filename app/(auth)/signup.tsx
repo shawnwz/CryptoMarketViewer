@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Link } from 'expo-router';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function SignupScreen() {
   const { signUp } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,7 +19,7 @@ export default function SignupScreen() {
     setMessage(null);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('auth.passwordMismatch'));
       return;
     }
 
@@ -28,17 +30,17 @@ export default function SignupScreen() {
     if (error) {
       setError(error);
     } else {
-      setMessage('Account created. Check your email to confirm before logging in.');
+      setMessage(t('auth.accountCreated'));
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Sign up</Text>
+      <Text style={styles.title}>{t('auth.signUp')}</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder={t('auth.email')}
         autoCapitalize="none"
         autoCorrect={false}
         keyboardType="email-address"
@@ -47,14 +49,14 @@ export default function SignupScreen() {
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder={t('auth.password')}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <TextInput
         style={styles.input}
-        placeholder="Confirm password"
+        placeholder={t('auth.confirmPassword')}
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -68,12 +70,12 @@ export default function SignupScreen() {
         onPress={handleSubmit}
         disabled={submitting}
       >
-        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Sign up</Text>}
+        {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t('auth.signUp')}</Text>}
       </Pressable>
 
       <Link href="/(auth)/login" asChild>
         <Pressable>
-          <Text style={styles.link}>Already have an account? Log in</Text>
+          <Text style={styles.link}>{t('auth.alreadyHaveAccount')}</Text>
         </Pressable>
       </Link>
     </View>

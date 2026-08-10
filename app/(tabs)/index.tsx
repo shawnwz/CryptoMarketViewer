@@ -1,11 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { CoinRow } from '../../components/CoinRow';
+import { useLanguage } from '../../contexts/LanguageContext';
 import { CmcCoin, fetchCoinListings } from '../../lib/coinmarketcap';
 
 const PAGE_SIZE = 10;
 
 export default function MarketScreen() {
+  const { t } = useTranslation();
+  const { currency } = useLanguage();
   const [coins, setCoins] = useState<CmcCoin[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -20,17 +24,17 @@ export default function MarketScreen() {
     setError(null);
     nextStartRef.current = 1;
     try {
-      const data = await fetchCoinListings({ start: 1, limit: PAGE_SIZE });
+      const data = await fetchCoinListings({ start: 1, limit: PAGE_SIZE, convert: currency });
       setCoins(data);
       setHasMore(data.length === PAGE_SIZE);
       nextStartRef.current = 1 + data.length;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load cryptocurrencies');
+      setError(e instanceof Error ? e.message : t('market.failedToLoad'));
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t, currency]);
 
   useEffect(() => {
     loadInitial();
@@ -41,17 +45,17 @@ export default function MarketScreen() {
     loadingMoreRef.current = true;
     setLoadingMore(true);
     try {
-      const data = await fetchCoinListings({ start: nextStartRef.current, limit: PAGE_SIZE });
+      const data = await fetchCoinListings({ start: nextStartRef.current, limit: PAGE_SIZE, convert: currency });
       setCoins((prev) => [...prev, ...data]);
       setHasMore(data.length === PAGE_SIZE);
       nextStartRef.current += data.length;
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load more cryptocurrencies');
+      setError(e instanceof Error ? e.message : t('market.failedToLoadMore'));
     } finally {
       loadingMoreRef.current = false;
       setLoadingMore(false);
     }
-  }, [hasMore, loading]);
+  }, [hasMore, loading, t, currency]);
 
   if (loading) {
     return (
@@ -66,7 +70,7 @@ export default function MarketScreen() {
       <View style={styles.center}>
         <Text style={styles.errorText}>{error}</Text>
         <Pressable style={styles.retryButton} onPress={() => loadInitial()}>
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text style={styles.retryButtonText}>{t('common.retry')}</Text>
         </Pressable>
       </View>
     );
