@@ -5,12 +5,12 @@ import { CmcCoin, getCoinLogoUrl, getUsdQuote } from '../lib/coinmarketcap';
 import { formatPercent, formatPrice } from '../lib/format';
 import { FavoriteButton } from './FavoriteButton';
 
-export function CoinRow({ coin }: { coin: CmcCoin }) {
+export function CoinRow({ coin, onPress }: { coin: CmcCoin; onPress?: () => void }) {
   const quote = getUsdQuote(coin);
   const [logoFailed, setLogoFailed] = useState(false);
 
   return (
-    <Link href={`/coin/${coin.id}`} asChild>
+    <Link href={`/coin/${coin.id}`} onPress={onPress} asChild>
       <Pressable style={styles.row}>
         {logoFailed ? (
           <View style={styles.logoFallback}>

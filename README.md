@@ -132,3 +132,12 @@ supabase/                 SQL migrations to run in the Supabase SQL editor
 - **Supabase** was chosen for auth over Firebase for its Postgres backend + Row Level Security, which the favorites feature relies on directly (no custom backend needed).
 - **Favorites started as a single flat list**, then evolved into multiple named lists (a many-to-many `favorite_lists` ↔ `favorite_list_coins` model). Because a coin can now belong to several lists at once, the old single-tap star toggle became an "add to list(s)" bottom sheet (`AddToListSheet`) instead — a plain on/off toggle no longer has a coherent meaning once membership isn't binary.
 - **`Alert.prompt` was avoided for naming/renaming lists** — it's iOS-only and has no Android equivalent, so list creation/renaming uses a custom cross-platform `TextPromptModal` instead.
+
+
+TODO:
+1. Search/filter on the Market tab — right now finding a specific coin means paging through 10-at-a-time results by rank. A search bar filtering by name/symbol is the most obviously missing basic feature for a "market viewer" and is low effort (CMC's /v1/cryptocurrency/map endpoint gives the full id/name/symbol list to filter against, or you filter within what's already loaded).
+2. Price history chart on the coin detail page — right now change is just numbers (1h/24h/7d/etc). A line chart from CMC's historical quotes endpoint would be the single most visually impressive addition, and this app doesn't have any data visualization yet, which is often expected for a market app.
+3. Portfolio tracking — let users enter "I hold 0.5 BTC" per coin and show total portfolio value. This is the natural next pillar after Market + Favorites + News (a real crypto app's core loop), reuses the exact Supabase + RLS pattern you already have for favorites, and would meaningfully differentiate the project.
+4. Biometric login (Face ID/Touch ID) — quick to bolt onto the existing Supabase auth session via expo-local-authentication, and it's a genuine "native mobile capability" showcase, which matters if this is being graded partly on mobile-specific competency rather than just CRUD screens.
+
+Smaller polish items worth a mention but lower priority: dark mode (moderate effort since colors are hardcoded per-screen, not themed), and a currency selector (USD/EUR/etc — trivial, CMC's convert param handles it server-side).

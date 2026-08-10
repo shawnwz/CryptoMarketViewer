@@ -125,3 +125,32 @@ export async function fetchCoinInfo(id: number): Promise<CmcCoinInfo> {
   const body = await cmcFetch<{ data: Record<string, CmcCoinInfo> }>(`/v2/cryptocurrency/info?id=${id}`);
   return body.data[String(id)];
 }
+
+export type CmcCoinMapEntry = {
+  id: number;
+  name: string;
+  symbol: string;
+  rank: number | null;
+};
+
+let coinMapPromise: Promise<CmcCoinMapEntry[]> | null = null;
+
+// The full id/name/symbol map for every active coin, sorted by rank — used to
+// search locally without hitting quotes/latest for every keystroke. This
+// endpoint costs 0 API credits (confirmed live) and caps at 5000 results
+// (also confirmed live: limit=10000 errors with "must be less than or equal
+// to 5000"), which covers every coin anyone would realistically search for.
+// Cached in memory for the app session since the list rarely changes.
+export function fetchCoinMap(): Promise<CmcCoinMapEntry[]> {
+  if (!coinMapPromise) {
+    coinMapPromise = cmcFetch<{ data: CmcCoinMapEntry[] }>(
+      '/v1/cryptocurrency/map?listing_status=active&sort=cmc_rank&limit=5000'
+    )
+      .then((body) => body.data)
+      .catch((e) => {
+        coinMapPromise = null;
+        throw e;
+      });
+  }
+  return coinMapPromise;
+}
