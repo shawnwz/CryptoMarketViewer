@@ -154,3 +154,27 @@ export function fetchCoinMap(): Promise<CmcCoinMapEntry[]> {
   }
   return coinMapPromise;
 }
+
+export type CmcHistoricalPoint = {
+  timestamp: string;
+  price: number;
+};
+
+// Note: /v2/cryptocurrency/ohlcv/historical returns 403 ("subscription plan
+// doesn't support this endpoint") on this key's plan — confirmed live.
+// quotes/historical works fine and is all a line chart needs anyway.
+export async function fetchCoinHistory({
+  id,
+  interval,
+  count,
+}: {
+  id: number;
+  interval: 'hourly' | 'daily';
+  count: number;
+}): Promise<CmcHistoricalPoint[]> {
+  const body = await cmcFetch<{
+    data: { quotes: { timestamp: string; quote: { USD: { price: number } } }[] };
+  }>(`/v2/cryptocurrency/quotes/historical?id=${id}&count=${count}&interval=${interval}`);
+
+  return body.data.quotes.map((q) => ({ timestamp: q.timestamp, price: q.quote.USD.price }));
+}

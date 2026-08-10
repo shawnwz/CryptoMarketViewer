@@ -12,9 +12,12 @@ import {
   View,
 } from 'react-native';
 import { FavoriteButton } from '../../components/FavoriteButton';
+import { PriceChart } from '../../components/PriceChart';
 import {
   CmcCoin,
   CmcCoinInfo,
+  CmcHistoricalPoint,
+  fetchCoinHistory,
   fetchCoinInfo,
   fetchCoinQuote,
   getUsdQuote,
@@ -28,6 +31,14 @@ import {
 } from '../../lib/format';
 
 type LinkItem = { label: string; url: string; icon: keyof typeof Ionicons.glyphMap };
+
+const RANGES: { label: string; interval: 'hourly' | 'daily'; count: number }[] = [
+  { label: '1D', interval: 'hourly', count: 24 },
+  { label: '7D', interval: 'daily', count: 7 },
+  { label: '30D', interval: 'daily', count: 30 },
+  { label: '90D', interval: 'daily', count: 90 },
+  { label: '1Y', interval: 'daily', count: 365 },
+];
 
 function getLinkItems(info: CmcCoinInfo): LinkItem[] {
   const items: LinkItem[] = [];
@@ -62,6 +73,10 @@ export default function CoinDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [rangeIndex, setRangeIndex] = useState(1); // default to 7D
+  const [history, setHistory] = useState<CmcHistoricalPoint[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -86,6 +101,28 @@ export default function CoinDetailScreen() {
       cancelled = true;
     };
   }, [coinId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const range = RANGES[rangeIndex];
+
+    async function loadHistory() {
+      setHistoryLoading(true);
+      try {
+        const data = await fetchCoinHistory({ id: coinId, interval: range.interval, count: range.count });
+        if (!cancelled) setHistory(data);
+      } catch {
+        if (!cancelled) setHistory([]);
+      } finally {
+        if (!cancelled) setHistoryLoading(false);
+      }
+    }
+
+    loadHistory();
+    return () => {
+      cancelled = true;
+    };
+  }, [coinId, rangeIndex]);
 
   if (loading) {
     return (
@@ -156,6 +193,29 @@ export default function CoinDetailScreen() {
           </View>
         ))}
       </ScrollView>
+
+      <View style={styles.chartSection}>
+        {historyLoading ? (
+          <View style={styles.chartLoading}>
+            <ActivityIndicator />
+          </View>
+        ) : (
+          <PriceChart data={history} />
+        )}
+        <View style={styles.rangeRow}>
+          {RANGES.map((range, index) => (
+            <Pressable
+              key={range.label}
+              style={[styles.rangeButton, index === rangeIndex && styles.rangeButtonSelected]}
+              onPress={() => setRangeIndex(index)}
+            >
+              <Text style={[styles.rangeButtonText, index === rangeIndex && styles.rangeButtonTextSelected]}>
+                {range.label}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
 
       {quote ? (
         <View style={styles.statsGrid}>
@@ -233,6 +293,19 @@ const styles = StyleSheet.create({
   changeValue: { fontSize: 13, fontWeight: '600' },
   positive: { color: '#16a34a' },
   negative: { color: '#dc2626' },
+  chartSection: { marginBottom: 24 },
+  chartLoading: { height: 180, alignItems: 'center', justifyContent: 'center' },
+  rangeRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
+  rangeButton: {
+    flex: 1,
+    marginHorizontal: 2,
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  rangeButtonSelected: { backgroundColor: '#eef2ff' },
+  rangeButtonText: { fontSize: 13, fontWeight: '600', color: '#888' },
+  rangeButtonTextSelected: { color: '#2563eb' },
   statsGrid: {
     borderRadius: 12,
     backgroundColor: '#f9f9f9',
