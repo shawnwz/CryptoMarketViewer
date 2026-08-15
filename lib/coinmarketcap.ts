@@ -1,17 +1,21 @@
-const API_BASE_URL = process.env.EXPO_PUBLIC_CMC_API_BASE_URL;
-const API_KEY = process.env.EXPO_PUBLIC_CMC_API_KEY;
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!API_BASE_URL || !API_KEY) {
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error(
-    'Missing CoinMarketCap env vars. Copy .env.example to .env and fill in ' +
-      'EXPO_PUBLIC_CMC_API_BASE_URL and EXPO_PUBLIC_CMC_API_KEY, then restart the dev server.'
+    'Missing Supabase env vars. Copy .env.example to .env and fill in ' +
+      'EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY, then restart the dev server.'
   );
 }
+
+// Requests go through the api-proxy Edge Function so the CoinMarketCap key
+// stays server-side instead of being bundled into the shipped app.
+const API_BASE_URL = `${SUPABASE_URL}/functions/v1/api-proxy/cmc`;
 
 function cmcFetch<T>(path: string): Promise<T> {
   return fetch(`${API_BASE_URL}${path}`, {
     headers: {
-      'X-CMC_PRO_API_KEY': API_KEY as string,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       Accept: 'application/json',
     },
   }).then(async (response) => {

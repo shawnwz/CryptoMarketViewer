@@ -28,7 +28,7 @@ A mobile app for browsing live cryptocurrency prices, viewing coin details, savi
 | Charts | `react-native-svg` (hand-rolled line chart, no charting library) |
 | Localization | `i18next` + `react-i18next` + `expo-localization` (device-locale detection) |
 
-All three external services (Supabase, CoinMarketCap, CryptoNews API) are called directly from the app using client-side API keys — see [API notes & limitations](#api-notes--limitations) below for the tradeoffs this implies.
+Supabase is called directly from the app with its public anon key (safe by design — protected by Row Level Security). CoinMarketCap and CryptoNews API are called through a Supabase Edge Function (`supabase/functions/api-proxy`) that injects their keys server-side, so those keys are never bundled into the app — see [API notes & limitations](#api-notes--limitations) and [Deploying the api-proxy Edge Function](#deploying-the-api-proxy-edge-function) below.
 
 ## Project structure
 
@@ -52,6 +52,7 @@ contexts/                 React context providers (AuthContext, FavoriteListsCon
 lib/                      API clients & helpers (supabase, coinmarketcap, news, favoriteLists, portfolio, searchHistory, format, i18n)
 locales/                  Translation strings: en.json, zh.json, ja.json
 supabase/                 SQL migrations to run in the Supabase SQL editor
+  functions/api-proxy/    Edge Function proxying CoinMarketCap & CryptoNews (keeps their keys off the device)
 ```
 
 ## Prerequisites
@@ -59,6 +60,7 @@ supabase/                 SQL migrations to run in the Supabase SQL editor
 - [Node.js](https://nodejs.org) LTS
 - npm
 - The [Expo Go](https://expo.dev/go) app on your phone, **or** an iOS Simulator / Android Emulator set up locally
+- The [Supabase CLI](https://supabase.com/docs/guides/cli/getting-started) (`brew install supabase/tap/supabase`), for deploying the `api-proxy` Edge Function
 - Accounts + API keys for:
   - [Supabase](https://supabase.com) (free tier)
   - [CoinMarketCap](https://pro.coinmarketcap.com/signup) (free/Basic tier is enough for market data + coin details)
@@ -85,19 +87,13 @@ supabase/                 SQL migrations to run in the Supabase SQL editor
    ```
    EXPO_PUBLIC_SUPABASE_URL=
    EXPO_PUBLIC_SUPABASE_ANON_KEY=
-
-   EXPO_PUBLIC_CMC_API_BASE_URL=https://pro-api.coinmarketcap.com
-   EXPO_PUBLIC_CMC_API_KEY=
-
-   EXPO_PUBLIC_NEWS_API_BASE_URL=https://cryptonews-api.com/api/v1
-   EXPO_PUBLIC_NEWS_API_KEY=
    ```
 
    - Supabase URL/anon key: Supabase dashboard → Project Settings → API
-   - CoinMarketCap key: pro.coinmarketcap.com → API Keys
-   - CryptoNews API key: cryptonews-api.com → your account dashboard
 
    `.env` is gitignored — never commit real keys.
+
+   The CoinMarketCap and CryptoNews API keys do **not** go in `.env` — they're only used server-side by the `api-proxy` Edge Function. See [Deploying the api-proxy Edge Function](#deploying-the-api-proxy-edge-function) below.
 
 3. **Set up the Supabase database**
 
@@ -110,7 +106,11 @@ supabase/                 SQL migrations to run in the Supabase SQL editor
 
    Steps 1–2 exist only so step 3 has something to migrate from — on a brand-new Supabase project with no existing data, you technically only need steps 3 and 4, but running all four in order is simplest and matches how this schema actually evolved. You can confirm the final state by checking **Table Editor** for `favorite_lists`, `favorite_list_coins`, and `portfolio_holdings` (no `favorites` table should remain).
 
-4. **Run the app**
+4. **Deploy the `api-proxy` Edge Function**
+
+   See [Deploying the api-proxy Edge Function](#deploying-the-api-proxy-edge-function) below.
+
+5. **Run the app**
 
    ```bash
    npm start
@@ -127,11 +127,50 @@ supabase/                 SQL migrations to run in the Supabase SQL editor
    npm run android
    ```
 
-   > **Note:** `npm run web` will start, but the CoinMarketCap and CryptoNews API calls will fail in a browser due to CORS — both APIs are meant for server-side or native-app use, not direct browser calls. This app targets iOS/Android; web is not a supported target for the live-data screens.
+   > **Note:** web is not a supported target — `react-native-web` isn't installed, so `npm run web` won't start. This app targets iOS/Android only.
+
+## Deploying the `api-proxy` Edge Function
+
+CoinMarketCap and CryptoNews are called through a Supabase Edge Function (`supabase/functions/api-proxy`) instead of directly from the app, so their API keys never end up in the shipped bundle (unlike `EXPO_PUBLIC_*` vars, which do — see [API notes & limitations](#api-notes--limitations)). The function takes requests at `.../api-proxy/cmc/<path>` or `.../api-proxy/news/<path>`, attaches the right key server-side, and forwards them upstream.
+
+One-time setup, from the project root:
+
+```bash
+# 1. Install the CLI if you don't have it
+brew install supabase/tap/supabase
+
+# 2. Log in (opens a browser)
+supabase login
+
+# 3. Link this repo to your Supabase project (creates supabase/config.toml)
+supabase init          # only needed once, if supabase/config.toml doesn't exist yet
+supabase link --project-ref <your-project-ref>   # ref is in the Supabase dashboard URL
+
+# 4. Store the real API keys as server-side secrets (never committed, never in .env)
+supabase secrets set \
+  CMC_API_BASE_URL=https://pro-api.coinmarketcap.com \
+  CMC_API_KEY=<your-coinmarketcap-key> \
+  NEWS_API_BASE_URL=https://cryptonews-api.com/api/v1 \
+  NEWS_API_KEY=<your-cryptonews-key>
+
+# 5. Deploy
+supabase functions deploy api-proxy
+```
+
+Re-run only step 5 (`supabase functions deploy api-proxy`) after editing `supabase/functions/api-proxy/index.ts`; re-run step 4 if a key rotates.
+
+To sanity-check the deployment directly (bypassing the app):
+
+```bash
+curl -H "Authorization: Bearer $EXPO_PUBLIC_SUPABASE_ANON_KEY" \
+  "$EXPO_PUBLIC_SUPABASE_URL/functions/v1/api-proxy/cmc/v1/cryptocurrency/map?listing_status=active&sort=cmc_rank&limit=2"
+```
+
+A 200 with coin data back means the function has the CMC secret wired up correctly. The `Authorization` header is required because Edge Functions verify a Supabase JWT by default — the public anon key satisfies that, same as any other Supabase client call.
 
 ## API notes & limitations
 
-- **API keys ship in the client.** All three services are called directly from the device using `EXPO_PUBLIC_*` env vars, which get bundled into the app and are visible to anyone inspecting network traffic or the compiled app. This is acceptable for a course project but is **not** a pattern to carry into production — the correct fix is proxying these calls through a backend (e.g. a Supabase Edge Function) so keys never leave the server.
+- **CoinMarketCap and CryptoNews keys are server-side only**, via the `api-proxy` Edge Function (see above) — they're set with `supabase secrets set`, never checked into `.env` or bundled into the app. Supabase itself is still called directly from the device with its public anon key, which is safe by design: Supabase expects the anon key to be public and relies on Row Level Security (not key secrecy) to protect data.
 - **CoinMarketCap `quotes/latest` caps the `id` list at 400** comma-separated coin IDs per request (confirmed from the API's own error message). Each favorites list is capped at 100 coins specifically to stay well under this limit — enforced both client-side (instant feedback) and via a Postgres trigger (`favorite_list_coins_limit_trigger` in `favorite_lists.sql`), so the cap holds even if something bypasses the app.
 - **Coin logos are free** — CoinMarketCap serves them from a static, unauthenticated CDN keyed only by coin ID (`https://s2.coinmarketcap.com/static/img/coins/64x64/{id}.png`), so the Market/Favorites rows show real logos without any extra API call or credit cost.
 - **CryptoNews API trial keys cap `items` at 3 per request.** The News tab pages in chunks of 3 as a result; a paid plan allows up to 100 and only requires bumping `PAGE_SIZE` in `app/(tabs)/news.tsx`.
