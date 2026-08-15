@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useTheme } from '../contexts/ThemeContext';
 import type { CmcHistoricalPoint } from '../lib/coinmarketcap';
 import { formatPrice } from '../lib/format';
+import { ThemeColors } from '../lib/theme';
 
 const CHART_HEIGHT = 180;
 
 export function PriceChart({ data }: { data: CmcHistoricalPoint[] }) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [width, setWidth] = useState(0);
 
   if (data.length < 2) {
@@ -24,7 +28,7 @@ export function PriceChart({ data }: { data: CmcHistoricalPoint[] }) {
   const max = Math.max(...prices);
   const range = max - min || 1;
   const isPositive = prices[prices.length - 1] >= prices[0];
-  const color = isPositive ? '#16a34a' : '#dc2626';
+  const color = isPositive ? colors.success : colors.danger;
 
   const points = data.map((d, i) => ({
     x: (i / (data.length - 1)) * width,
@@ -56,10 +60,12 @@ export function PriceChart({ data }: { data: CmcHistoricalPoint[] }) {
   );
 }
 
-const styles = StyleSheet.create({
-  chartWrapper: { height: CHART_HEIGHT, width: '100%' },
-  placeholder: { height: CHART_HEIGHT, alignItems: 'center', justifyContent: 'center' },
-  placeholderText: { color: '#999' },
-  labelsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
-  labelText: { fontSize: 12, color: '#888' },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    chartWrapper: { height: CHART_HEIGHT, width: '100%' },
+    placeholder: { height: CHART_HEIGHT, alignItems: 'center', justifyContent: 'center' },
+    placeholderText: { color: colors.textMuted },
+    labelsRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 },
+    labelText: { fontSize: 12, color: colors.textMuted },
+  });
+}

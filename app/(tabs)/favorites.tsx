@@ -16,13 +16,17 @@ import { CoinRow } from '../../components/CoinRow';
 import { TextPromptModal } from '../../components/TextPromptModal';
 import { useFavoriteLists } from '../../contexts/FavoriteListsContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { CmcCoin, fetchCoinQuotes } from '../../lib/coinmarketcap';
+import { ThemeColors } from '../../lib/theme';
 
 type PromptMode = 'create' | 'rename' | null;
 
 export default function FavoritesScreen() {
   const { t } = useTranslation();
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { lists, listCoins, loading: listsLoading, createList, renameList, deleteList } = useFavoriteLists();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [coins, setCoins] = useState<CmcCoin[]>([]);
@@ -161,13 +165,13 @@ export default function FavoritesScreen() {
           </Pressable>
         ))}
         <Pressable style={styles.addChip} onPress={() => setPromptMode('create')}>
-          <Ionicons name="add" size={18} color="#2563eb" />
+          <Ionicons name="add" size={18} color={colors.accent} />
         </Pressable>
       </ScrollView>
 
       {lists.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="albums-outline" size={40} color="#ccc" />
+          <Ionicons name="albums-outline" size={40} color={colors.textFaint} />
           <Text style={styles.emptyTitle}>{t('favorites.noListsYet')}</Text>
           <Text style={styles.emptySubtitle}>{t('favorites.createListPrompt')}</Text>
           <Pressable style={styles.createFirstButton} onPress={() => setPromptMode('create')}>
@@ -184,7 +188,7 @@ export default function FavoritesScreen() {
         </View>
       ) : coins.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="star-outline" size={40} color="#ccc" />
+          <Ionicons name="star-outline" size={40} color={colors.textFaint} />
           <Text style={styles.emptyTitle}>{t('favorites.noCoinsInList', { name: selectedList?.name })}</Text>
           <Text style={styles.emptySubtitle}>{t('favorites.tapStarPrompt')}</Text>
         </View>
@@ -213,34 +217,42 @@ export default function FavoritesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  list: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center' },
-  chipsScrollView: { flexGrow: 0 },
-  chipsRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
-    maxWidth: 160,
-  },
-  chipSelected: { backgroundColor: '#2563eb' },
-  chipText: { fontSize: 13, fontWeight: '600', color: '#444' },
-  chipTextSelected: { color: '#fff' },
-  addChip: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#eef2ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12 },
-  emptySubtitle: { fontSize: 13, color: '#888', marginTop: 4, textAlign: 'center' },
-  createFirstButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20, marginTop: 16 },
-  createFirstButtonText: { color: '#fff', fontWeight: '600' },
-  separator: { height: 1, backgroundColor: '#eee', marginLeft: 16 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { flex: 1 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center' },
+    chipsScrollView: { flexGrow: 0 },
+    chipsRow: { paddingHorizontal: 16, paddingVertical: 12, gap: 8, alignItems: 'center' },
+    chip: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 16,
+      backgroundColor: colors.surface,
+      maxWidth: 160,
+    },
+    chipSelected: { backgroundColor: colors.accent },
+    chipText: { fontSize: 13, fontWeight: '600', color: colors.text },
+    chipTextSelected: { color: colors.onAccent },
+    addChip: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: colors.accentMuted,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12, color: colors.text },
+    emptySubtitle: { fontSize: 13, color: colors.textMuted, marginTop: 4, textAlign: 'center' },
+    createFirstButton: {
+      backgroundColor: colors.accent,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      marginTop: 16,
+    },
+    createFirstButtonText: { color: colors.onAccent, fontWeight: '600' },
+    separator: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
+  });
+}

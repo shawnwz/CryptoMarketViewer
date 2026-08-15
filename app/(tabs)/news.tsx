@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -11,8 +11,10 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
 import { formatShortDate } from '../../lib/format';
 import { fetchNews, NewsArticle } from '../../lib/news';
+import { ThemeColors } from '../../lib/theme';
 
 // The API key's trial plan caps `items` at 3 per request (confirmed live —
 // anything higher returns a 403), so we page in chunks of 3 instead of 10.
@@ -26,6 +28,8 @@ const SENTIMENT_KEYS: Record<string, string> = {
 
 function NewsCard({ article }: { article: NewsArticle }) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Pressable style={styles.card} onPress={() => Linking.openURL(article.news_url)}>
@@ -60,6 +64,8 @@ function NewsCard({ article }: { article: NewsArticle }) {
 
 export default function NewsScreen() {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -143,27 +149,31 @@ export default function NewsScreen() {
         ) : null
       }
       contentContainerStyle={articles.length === 0 ? styles.center : undefined}
+      style={styles.list}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center', marginBottom: 16 },
-  retryButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
-  retryButtonText: { color: '#fff', fontWeight: '600' },
-  card: { flexDirection: 'row', padding: 16, backgroundColor: '#fff' },
-  image: { width: 84, height: 84, borderRadius: 8, backgroundColor: '#eee' },
-  cardBody: { flex: 1, marginLeft: 12, justifyContent: 'center' },
-  title: { fontSize: 15, fontWeight: '600', lineHeight: 20 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, flexWrap: 'wrap' },
-  source: { fontSize: 12, color: '#666', fontWeight: '500' },
-  metaDot: { fontSize: 12, color: '#ccc', marginHorizontal: 6 },
-  date: { fontSize: 12, color: '#888' },
-  sentiment: { fontSize: 11, fontWeight: '600', marginLeft: 8 },
-  positive: { color: '#16a34a' },
-  negative: { color: '#dc2626' },
-  neutral: { color: '#888' },
-  separator: { height: 1, backgroundColor: '#eee' },
-  footer: { paddingVertical: 20 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    list: { backgroundColor: colors.background },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center', marginBottom: 16 },
+    retryButton: { backgroundColor: colors.accent, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
+    retryButtonText: { color: colors.onAccent, fontWeight: '600' },
+    card: { flexDirection: 'row', padding: 16, backgroundColor: colors.background },
+    image: { width: 84, height: 84, borderRadius: 8, backgroundColor: colors.surface },
+    cardBody: { flex: 1, marginLeft: 12, justifyContent: 'center' },
+    title: { fontSize: 15, fontWeight: '600', lineHeight: 20, color: colors.text },
+    metaRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8, flexWrap: 'wrap' },
+    source: { fontSize: 12, color: colors.textMuted, fontWeight: '500' },
+    metaDot: { fontSize: 12, color: colors.textFaint, marginHorizontal: 6 },
+    date: { fontSize: 12, color: colors.textMuted },
+    sentiment: { fontSize: 11, fontWeight: '600', marginLeft: 8 },
+    positive: { color: colors.success },
+    negative: { color: colors.danger },
+    neutral: { color: colors.textMuted },
+    separator: { height: 1, backgroundColor: colors.border },
+    footer: { paddingVertical: 20 },
+  });
+}

@@ -12,6 +12,7 @@ A mobile app for browsing live cryptocurrency prices, viewing coin details, savi
 - **Portfolio tracking** — record how much of each coin you hold, see live total value (quantity × current price, refreshable on demand or by pull-to-refresh), edit or remove a holding by tapping it
 - **News feed** — latest general crypto news with infinite scroll and pull-to-refresh; tapping a story opens it in the browser
 - **English / 中文 / 日本語** — a language picker (in Settings, and on the login screen so it's usable before you're even signed in) switches every screen's UI text, number/date formatting, and — automatically — the display currency (English→USD, Chinese→CNY, Japanese→JPY). Coin descriptions and news articles stay in English regardless, since those come from English-only third-party APIs that can't be localized on our end.
+- **Light / Dark / System appearance** — a picker in Settings switches the whole app's color scheme, persisted on-device; "System" (the default) follows the OS setting live via `useColorScheme`.
 
 ## Tech stack
 
@@ -48,8 +49,9 @@ components/               shared UI components:
                             TextPromptModal  — cross-platform text input modal (create/rename a list)
                             PriceChart       — SVG line chart for a coin's historical price
                             LanguagePicker   — English/中文/日本語 selector (Settings + login screen)
-contexts/                 React context providers (AuthContext, FavoriteListsContext, LanguageContext)
-lib/                      API clients & helpers (supabase, coinmarketcap, news, favoriteLists, portfolio, searchHistory, format, i18n)
+                            ThemePicker      — Light/Dark/System selector (Settings)
+contexts/                 React context providers (AuthContext, FavoriteListsContext, LanguageContext, ThemeContext)
+lib/                      API clients & helpers (supabase, coinmarketcap, news, favoriteLists, portfolio, searchHistory, format, i18n, theme)
 locales/                  Translation strings: en.json, zh.json, ja.json
 supabase/                 SQL migrations to run in the Supabase SQL editor
   functions/api-proxy/    Edge Function proxying CoinMarketCap & CryptoNews (keeps their keys off the device)
@@ -193,13 +195,14 @@ A 200 with coin data back means the function has the CMC secret wired up correct
 - **Currency follows language automatically rather than being a separate picker.** Language and currency are both rare, related decisions — a Chinese reader overwhelmingly wants CNY — so a second independent setting would mostly go untouched. `LanguageContext` derives `currency` from `language` via a fixed map (en→USD, zh→CNY, ja→JPY); no separate persisted preference or UI needed.
 - **`lib/format.ts` uses module-level `currentLocale`/`currentCurrency` variables** (set via `setFormatLocale`/`setFormatCurrency` from `LanguageContext`) rather than threading a locale/currency argument through every formatter call site. Plain functions can't use React context directly, and passing them explicitly everywhere would have meant touching dozens of call sites for no real benefit.
 - **`getUsdQuote` was renamed to `getQuote(coin, currency)` instead of getting an overload.** The hard rename was deliberate: removing the old name entirely meant TypeScript would refuse to compile until every call site was updated — which caught one real miss (the portfolio total-value calculation) during the currency rollout.
+- **Theming uses a `useTheme()` color-token hook, not React Native's `Appearance` API called ad hoc per screen.** `ThemeContext` resolves a `system`/`light`/`dark` preference (persisted, defaulting to `system` via `useColorScheme`) into a flat `colors` object from `lib/theme.ts`; every screen turns its `StyleSheet.create({...})` into a `createStyles(colors)` function called with `useMemo`. This keeps color values in one place instead of duplicating light/dark branches in 17 separate stylesheets. `app.json`'s `userInterfaceStyle` had to change from `"light"` (which hard-locks the app away from the OS dark setting) to `"automatic"` for system-following to work at all.
 
 ## Possible future work
 
-Done: Search, price history chart, portfolio tracking, and multi-language + currency support (see Features above). Remaining ideas:
+Done: Search, price history chart, portfolio tracking, multi-language + currency support, and Light/Dark/System appearance (see Features above). Remaining ideas:
 
 1. **Biometric login (Face ID/Touch ID)** — quick to bolt onto the existing Supabase auth session via `expo-local-authentication`, and it's a genuine "native mobile capability" showcase, which matters if this is being graded partly on mobile-specific competency rather than just CRUD screens.
 2. **Portfolio value-over-time chart** — currently only *current* portfolio value is shown, not its history. This is deliberately out of scope for now: doing it accurately needs either (a) a full buy/sell transaction ledger (not just current quantity) so historical holdings can be reconstructed, or (b) a scheduled job snapshotting daily portfolio value server-side (this project has no cron infrastructure yet). A quick-but-approximate version — reusing `fetchCoinHistory` + `PriceChart` per holding, assuming current quantities were held for the whole period — is possible without new infrastructure, but would need to be clearly labeled as approximate since it can't reflect quantity changes over time.
 3. **A manual currency override** — right now currency is strictly derived from language (see Tech decisions), so an English-reading user who wants JPY instead of USD has no way to get it. Decoupling them into an independent picker is straightforward given the plumbing already exists (`convert` threaded through every fetch function) — it would just need its own persisted preference and UI.
 
-Smaller polish items worth a mention but lower priority: dark mode (moderate effort since colors are hardcoded per-screen, not themed), and more languages beyond English/Chinese/Japanese (mechanically the same as adding the first two — a new `locales/xx.json` plus one more entry in each language-keyed map).
+Smaller polish items worth a mention but lower priority: more languages beyond English/Chinese/Japanese (mechanically the same as adding the first two — a new `locales/xx.json` plus one more entry in each language-keyed map).

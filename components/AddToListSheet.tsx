@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFavoriteLists } from '../contexts/FavoriteListsContext';
+import { useTheme } from '../contexts/ThemeContext';
 import type { CmcCoin } from '../lib/coinmarketcap';
 import type { FavoriteList } from '../lib/favoriteLists';
+import { ThemeColors } from '../lib/theme';
 import { TextPromptModal } from './TextPromptModal';
 
 type Props = {
@@ -15,6 +17,8 @@ type Props = {
 
 export function AddToListSheet({ visible, coin, onClose }: Props) {
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { lists, isInList, toggleCoinInList, createList } = useFavoriteLists();
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -44,7 +48,7 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
           <View style={styles.header}>
             <Text style={styles.title}>{t('addToList.title', { symbol: coin.symbol })}</Text>
             <Pressable onPress={onClose} hitSlop={8}>
-              <Ionicons name="close" size={22} color="#111" />
+              <Ionicons name="close" size={22} color={colors.text} />
             </Pressable>
           </View>
 
@@ -64,7 +68,7 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
                     <Ionicons
                       name={inList ? 'checkmark-circle' : 'ellipse-outline'}
                       size={22}
-                      color={inList ? '#2563eb' : '#ccc'}
+                      color={inList ? colors.accent : colors.textFaint}
                     />
                   )}
                 </Pressable>
@@ -73,7 +77,7 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
           />
 
           <Pressable style={styles.newListButton} onPress={() => setCreating(true)}>
-            <Ionicons name="add" size={18} color="#2563eb" />
+            <Ionicons name="add" size={18} color={colors.accent} />
             <Text style={styles.newListButtonText}>{t('addToList.newList')}</Text>
           </Pressable>
         </View>
@@ -91,29 +95,31 @@ export function AddToListSheet({ visible, coin, onClose }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
-  sheet: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 16,
-    paddingBottom: 32,
-    maxHeight: '70%',
-  },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  title: { fontSize: 16, fontWeight: '700' },
-  list: { flexGrow: 0 },
-  emptyText: { color: '#888', textAlign: 'center', paddingVertical: 24 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-  },
-  rowText: { fontSize: 15 },
-  newListButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 16, gap: 6 },
-  newListButtonText: { color: '#2563eb', fontWeight: '600', fontSize: 15 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: colors.overlay },
+    sheet: {
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 16,
+      borderTopRightRadius: 16,
+      padding: 16,
+      paddingBottom: 32,
+      maxHeight: '70%',
+    },
+    header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+    title: { fontSize: 16, fontWeight: '700', color: colors.text },
+    list: { flexGrow: 0 },
+    emptyText: { color: colors.textMuted, textAlign: 'center', paddingVertical: 24 },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 14,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    rowText: { fontSize: 15, color: colors.text },
+    newListButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 16, gap: 6 },
+    newListButtonText: { color: colors.accent, fontWeight: '600', fontSize: 15 },
+  });
+}

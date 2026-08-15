@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -14,9 +14,11 @@ import {
   View,
 } from 'react-native';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { CmcCoin, CmcCoinMapEntry, fetchCoinMap, fetchCoinQuotes, getCoinLogoUrl, getQuote } from '../../lib/coinmarketcap';
 import { formatPrice } from '../../lib/format';
 import { upsertHolding } from '../../lib/portfolio';
+import { ThemeColors } from '../../lib/theme';
 
 const MAX_RESULTS = 30;
 const DEBOUNCE_MS = 300;
@@ -25,6 +27,8 @@ const DEBOUNCE_MS = 300;
 // coin detail screen, which isn't what we want while selecting one to add.
 function PickableCoinRow({ coin, onPress }: { coin: CmcCoin; onPress: () => void }) {
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const quote = getQuote(coin, currency);
   const [logoFailed, setLogoFailed] = useState(false);
 
@@ -51,6 +55,8 @@ function PickableCoinRow({ coin, onPress }: { coin: CmcCoin; onPress: () => void
 export default function AddHoldingScreen() {
   const { t } = useTranslation();
   const { currency } = useLanguage();
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [coinMap, setCoinMap] = useState<CmcCoinMapEntry[]>([]);
@@ -133,11 +139,11 @@ export default function AddHoldingScreen() {
           headerLeft: () =>
             selectedCoin ? (
               <Pressable onPress={() => setSelectedCoin(null)} hitSlop={8}>
-                <Ionicons name="chevron-back" size={24} color="#2563eb" />
+                <Ionicons name="chevron-back" size={24} color={colors.accent} />
               </Pressable>
             ) : (
               <Pressable onPress={() => router.back()} hitSlop={8}>
-                <Ionicons name="close" size={22} color="#111" />
+                <Ionicons name="close" size={22} color={colors.text} />
               </Pressable>
             ),
         }}
@@ -150,6 +156,8 @@ export default function AddHoldingScreen() {
           </Text>
           <TextInput
             style={styles.quantityInput}
+            placeholderTextColor={colors.textMuted}
+            keyboardAppearance={scheme}
             value={quantity}
             onChangeText={setQuantity}
             keyboardType="decimal-pad"
@@ -162,7 +170,7 @@ export default function AddHoldingScreen() {
             disabled={saving || !quantity.trim()}
           >
             {saving ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.onAccent} />
             ) : (
               <Text style={styles.saveButtonText}>{t('portfolio.addToPortfolio')}</Text>
             )}
@@ -172,11 +180,12 @@ export default function AddHoldingScreen() {
         <>
           <View style={styles.searchBarRow}>
             <View style={styles.searchBar}>
-              <Ionicons name="search" size={18} color="#999" style={styles.searchIcon} />
+              <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
               <TextInput
                 style={styles.searchInput}
                 placeholder={t('common.searchCoinsPlaceholder')}
-                placeholderTextColor="#999"
+                placeholderTextColor={colors.textMuted}
+                keyboardAppearance={scheme}
                 value={query}
                 onChangeText={setQuery}
                 autoCorrect={false}
@@ -196,7 +205,7 @@ export default function AddHoldingScreen() {
             </View>
           ) : query.trim().length === 0 ? (
             <View style={styles.center}>
-              <Ionicons name="search-outline" size={40} color="#ccc" />
+              <Ionicons name="search-outline" size={40} color={colors.textFaint} />
               <Text style={styles.emptyTitle}>{t('portfolio.searchForCoinToAdd')}</Text>
             </View>
           ) : results.length === 0 ? (
@@ -219,57 +228,60 @@ export default function AddHoldingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  list: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center' },
-  emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12, color: '#888', textAlign: 'center' },
-  searchBarRow: { paddingHorizontal: 16, paddingVertical: 12 },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 40,
-  },
-  searchIcon: { marginRight: 6 },
-  searchInput: { flex: 1, fontSize: 16, color: '#111', height: '100%' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f0f0f0' },
-  logoFallback: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoFallbackText: { fontSize: 12, fontWeight: '700', color: '#888' },
-  nameColumn: { flex: 1, marginLeft: 10 },
-  name: { fontSize: 15, fontWeight: '600' },
-  symbol: { fontSize: 13, color: '#888', marginTop: 2 },
-  price: { fontSize: 15, fontWeight: '600' },
-  separator: { height: 1, backgroundColor: '#eee', marginLeft: 16 },
-  quantityForm: { padding: 16 },
-  selectedCoinName: { fontSize: 17, fontWeight: '700', marginBottom: 16 },
-  quantityInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  saveButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: '#fff', fontWeight: '600', fontSize: 15 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { flex: 1 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center' },
+    emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12, color: colors.textMuted, textAlign: 'center' },
+    searchBarRow: { paddingHorizontal: 16, paddingVertical: 12 },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      height: 40,
+    },
+    searchIcon: { marginRight: 6 },
+    searchInput: { flex: 1, fontSize: 16, color: colors.text, height: '100%' },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.background,
+    },
+    logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surface },
+    logoFallback: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logoFallbackText: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
+    nameColumn: { flex: 1, marginLeft: 10 },
+    name: { fontSize: 15, fontWeight: '600', color: colors.text },
+    symbol: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+    price: { fontSize: 15, fontWeight: '600', color: colors.text },
+    separator: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
+    quantityForm: { padding: 16 },
+    selectedCoinName: { fontSize: 17, fontWeight: '700', marginBottom: 16, color: colors.text },
+    quantityInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 16,
+      marginBottom: 16,
+      color: colors.text,
+    },
+    saveButton: { backgroundColor: colors.accent, borderRadius: 8, paddingVertical: 12, alignItems: 'center' },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.onAccent, fontWeight: '600', fontSize: 15 },
+  });
+}

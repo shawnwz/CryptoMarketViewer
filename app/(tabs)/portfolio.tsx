@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -16,14 +16,18 @@ import {
   View,
 } from 'react-native';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { CmcCoin, fetchCoinQuotes, getCoinLogoUrl, getQuote } from '../../lib/coinmarketcap';
 import { formatCompactCurrency, formatPercent, formatPrice } from '../../lib/format';
 import { deleteHolding, Holding, listHoldings, upsertHolding } from '../../lib/portfolio';
+import { ThemeColors } from '../../lib/theme';
 
 type EnrichedHolding = Holding & { coin: CmcCoin | null };
 
 function HoldingRow({ holding, onPress }: { holding: EnrichedHolding; onPress: () => void }) {
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const quote = holding.coin ? getQuote(holding.coin, currency) : undefined;
   const value = quote ? quote.price * holding.quantity : null;
   const [logoFailed, setLogoFailed] = useState(false);
@@ -73,6 +77,8 @@ function EditHoldingModal({
   onDelete: () => void;
 }) {
   const { t } = useTranslation();
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [quantity, setQuantity] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -105,6 +111,8 @@ function EditHoldingModal({
           <Text style={styles.cardTitle}>{holding?.name}</Text>
           <TextInput
             style={styles.quantityInput}
+            placeholderTextColor={colors.textMuted}
+            keyboardAppearance={scheme}
             value={quantity}
             onChangeText={setQuantity}
             keyboardType="decimal-pad"
@@ -125,7 +133,7 @@ function EditHoldingModal({
                 disabled={saving}
               >
                 {saving ? (
-                  <ActivityIndicator color="#fff" size="small" />
+                  <ActivityIndicator color={colors.onAccent} size="small" />
                 ) : (
                   <Text style={styles.saveButtonText}>{t('common.save')}</Text>
                 )}
@@ -141,6 +149,8 @@ function EditHoldingModal({
 export default function PortfolioScreen() {
   const { t } = useTranslation();
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const router = useRouter();
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [quotes, setQuotes] = useState<Map<number, CmcCoin>>(new Map());
@@ -229,7 +239,7 @@ export default function PortfolioScreen() {
         <View style={styles.totalRow}>
           <Text style={styles.totalValue}>{formatCompactCurrency(totalValue)}</Text>
           <Pressable onPress={() => load(true)} hitSlop={10} style={styles.refreshButton}>
-            <Ionicons name="refresh" size={20} color="#2563eb" />
+            <Ionicons name="refresh" size={20} color={colors.accent} />
           </Pressable>
         </View>
       </View>
@@ -240,7 +250,7 @@ export default function PortfolioScreen() {
         </View>
       ) : enriched.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="wallet-outline" size={40} color="#ccc" />
+          <Ionicons name="wallet-outline" size={40} color={colors.textFaint} />
           <Text style={styles.emptyTitle}>{t('portfolio.noHoldingsYet')}</Text>
           <Text style={styles.emptySubtitle}>{t('portfolio.addCoinPrompt')}</Text>
         </View>
@@ -256,7 +266,7 @@ export default function PortfolioScreen() {
       )}
 
       <Pressable style={styles.addButton} onPress={() => router.push('/portfolio/add')}>
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={28} color={colors.onAccent} />
       </Pressable>
 
       <EditHoldingModal
@@ -269,78 +279,81 @@ export default function PortfolioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  list: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center' },
-  emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12 },
-  emptySubtitle: { fontSize: 13, color: '#888', marginTop: 4, textAlign: 'center' },
-  totalSection: { padding: 16 },
-  totalLabel: { fontSize: 13, color: '#888' },
-  totalRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
-  totalValue: { fontSize: 32, fontWeight: '700' },
-  refreshButton: { marginLeft: 12, padding: 4 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f0f0f0' },
-  logoFallback: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoFallbackText: { fontSize: 12, fontWeight: '700', color: '#888' },
-  nameColumn: { flex: 1, marginLeft: 10 },
-  name: { fontSize: 15, fontWeight: '600' },
-  quantity: { fontSize: 13, color: '#888', marginTop: 2 },
-  valueColumn: { alignItems: 'flex-end' },
-  value: { fontSize: 15, fontWeight: '600' },
-  change: { fontSize: 13, marginTop: 2 },
-  positive: { color: '#16a34a' },
-  negative: { color: '#dc2626' },
-  separator: { height: 1, backgroundColor: '#eee', marginLeft: 16 },
-  addButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2563eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
-  cardTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12 },
-  quantityInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    marginBottom: 16,
-  },
-  cardButtonRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  deleteButtonText: { color: '#dc2626', fontWeight: '600' },
-  cardButtonRowRight: { flexDirection: 'row', gap: 12 },
-  cancelButton: { paddingVertical: 10, paddingHorizontal: 12 },
-  cancelButtonText: { color: '#666', fontWeight: '600' },
-  saveButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
-  saveButtonDisabled: { opacity: 0.5 },
-  saveButtonText: { color: '#fff', fontWeight: '600' },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { flex: 1 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center' },
+    emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12, color: colors.text },
+    emptySubtitle: { fontSize: 13, color: colors.textMuted, marginTop: 4, textAlign: 'center' },
+    totalSection: { padding: 16 },
+    totalLabel: { fontSize: 13, color: colors.textMuted },
+    totalRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+    totalValue: { fontSize: 32, fontWeight: '700', color: colors.text },
+    refreshButton: { marginLeft: 12, padding: 4 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.background,
+    },
+    logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surface },
+    logoFallback: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logoFallbackText: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
+    nameColumn: { flex: 1, marginLeft: 10 },
+    name: { fontSize: 15, fontWeight: '600', color: colors.text },
+    quantity: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+    valueColumn: { alignItems: 'flex-end' },
+    value: { fontSize: 15, fontWeight: '600', color: colors.text },
+    change: { fontSize: 13, marginTop: 2 },
+    positive: { color: colors.success },
+    negative: { color: colors.danger },
+    separator: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
+    addButton: {
+      position: 'absolute',
+      right: 20,
+      bottom: 20,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: 24 },
+    card: { backgroundColor: colors.card, borderRadius: 12, padding: 20 },
+    cardTitle: { fontSize: 16, fontWeight: '700', marginBottom: 12, color: colors.text },
+    quantityInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 15,
+      marginBottom: 16,
+      color: colors.text,
+    },
+    cardButtonRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    deleteButtonText: { color: colors.danger, fontWeight: '600' },
+    cardButtonRowRight: { flexDirection: 'row', gap: 12 },
+    cancelButton: { paddingVertical: 10, paddingHorizontal: 12 },
+    cancelButtonText: { color: colors.textMuted, fontWeight: '600' },
+    saveButton: { backgroundColor: colors.accent, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
+    saveButtonDisabled: { opacity: 0.5 },
+    saveButtonText: { color: colors.onAccent, fontWeight: '600' },
+  });
+}

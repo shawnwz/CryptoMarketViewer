@@ -33,7 +33,13 @@
     "title": "設定",
     "loggedInAs": "{{email}} でログイン中",
     "logOut": "ログアウト",
-    "language": "言語"
+    "language": "言語",
+    "appearance": "外観"
+  },
+  "theme": {
+    "system": "システム",
+    "light": "ライト",
+    "dark": "ダーク"
   },
   "market": {
     "failedToLoad": "暗号資産の読み込みに失敗しました",

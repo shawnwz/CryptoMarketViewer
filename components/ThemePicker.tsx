@@ -1,31 +1,30 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import type { SupportedLanguage } from '../lib/i18n';
 import { ThemeColors } from '../lib/theme';
+import { ThemePreference, useTheme } from '../contexts/ThemeContext';
 
-const OPTIONS: { code: SupportedLanguage; label: string }[] = [
-  { code: 'en', label: 'English' },
-  { code: 'zh', label: '中文' },
-  { code: 'ja', label: '日本語' },
+const OPTIONS: { value: ThemePreference; labelKey: string }[] = [
+  { value: 'system', labelKey: 'theme.system' },
+  { value: 'light', labelKey: 'theme.light' },
+  { value: 'dark', labelKey: 'theme.dark' },
 ];
 
-export function LanguagePicker() {
-  const { language, setLanguage } = useLanguage();
-  const { colors } = useTheme();
+export function ThemePicker() {
+  const { t } = useTranslation();
+  const { preference, colors, setPreference } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.row}>
       {OPTIONS.map((option) => (
         <Pressable
-          key={option.code}
-          style={[styles.option, option.code === language && styles.optionSelected]}
-          onPress={() => setLanguage(option.code)}
+          key={option.value}
+          style={[styles.option, option.value === preference && styles.optionSelected]}
+          onPress={() => setPreference(option.value)}
         >
-          <Text style={[styles.optionText, option.code === language && styles.optionTextSelected]}>
-            {option.label}
+          <Text style={[styles.optionText, option.value === preference && styles.optionTextSelected]}>
+            {t(option.labelKey)}
           </Text>
         </Pressable>
       ))}

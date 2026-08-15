@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -15,6 +15,7 @@ import {
 import { FavoriteButton } from '../../components/FavoriteButton';
 import { PriceChart } from '../../components/PriceChart';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import {
   CmcCoin,
   CmcCoinInfo,
@@ -31,6 +32,7 @@ import {
   formatPercent,
   formatPrice,
 } from '../../lib/format';
+import { ThemeColors } from '../../lib/theme';
 
 type LinkItem = { labelKey: string; url: string; icon: keyof typeof Ionicons.glyphMap };
 
@@ -63,6 +65,8 @@ function getLinkItems(info: CmcCoinInfo): LinkItem[] {
 }
 
 function StatRow({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   return (
     <View style={styles.statRow}>
       <Text style={styles.statLabel}>{label}</Text>
@@ -74,6 +78,8 @@ function StatRow({ label, value }: { label: string; value: string }) {
 export default function CoinDetailScreen() {
   const { t } = useTranslation();
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const coinId = Number(id);
 
@@ -284,9 +290,9 @@ export default function CoinDetailScreen() {
           <Text style={styles.sectionTitle}>{t('coin.links')}</Text>
           {links.map((link) => (
             <Pressable key={link.labelKey} style={styles.linkRow} onPress={() => Linking.openURL(link.url)}>
-              <Ionicons name={link.icon} size={20} color="#2563eb" />
+              <Ionicons name={link.icon} size={20} color={colors.accent} />
               <Text style={styles.linkLabel}>{t(link.labelKey)}</Text>
-              <Ionicons name="open-outline" size={16} color="#999" />
+              <Ionicons name="open-outline" size={16} color={colors.textFaint} />
             </Pressable>
           ))}
         </View>
@@ -295,80 +301,82 @@ export default function CoinDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  favoriteButton: { marginRight: 16, padding: 4 },
-  content: { padding: 16, paddingBottom: 40 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
-  logo: { width: 48, height: 48, borderRadius: 24 },
-  headerText: { marginLeft: 12 },
-  name: { fontSize: 20, fontWeight: '700' },
-  symbol: { fontSize: 13, color: '#888', marginTop: 2 },
-  priceBlock: { marginBottom: 16 },
-  price: { fontSize: 32, fontWeight: '700' },
-  priceChange: { fontSize: 15, marginTop: 4 },
-  changeRow: { marginBottom: 16 },
-  changeItem: {
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    marginRight: 8,
-  },
-  changeLabel: { fontSize: 12, color: '#888', marginBottom: 4 },
-  changeValue: { fontSize: 13, fontWeight: '600' },
-  positive: { color: '#16a34a' },
-  negative: { color: '#dc2626' },
-  chartSection: { marginBottom: 24 },
-  chartLoading: { height: 180, alignItems: 'center', justifyContent: 'center' },
-  rangeRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
-  rangeButton: {
-    flex: 1,
-    marginHorizontal: 2,
-    paddingVertical: 8,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  rangeButtonSelected: { backgroundColor: '#eef2ff' },
-  rangeButtonText: { fontSize: 13, fontWeight: '600', color: '#888' },
-  rangeButtonTextSelected: { color: '#2563eb' },
-  statsGrid: {
-    borderRadius: 12,
-    backgroundColor: '#f9f9f9',
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e5e5',
-  },
-  statLabel: { fontSize: 14, color: '#666' },
-  statValue: { fontSize: 14, fontWeight: '600' },
-  section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 17, fontWeight: '700', marginBottom: 8 },
-  description: { fontSize: 14, lineHeight: 20, color: '#333' },
-  dateAdded: { fontSize: 13, color: '#888', marginTop: 8 },
-  tagsRow: { marginTop: 12 },
-  tag: {
-    backgroundColor: '#eef2ff',
-    borderRadius: 16,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginRight: 8,
-  },
-  tagText: { fontSize: 12, color: '#4338ca' },
-  linkRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e5e5e5',
-  },
-  linkLabel: { flex: 1, marginLeft: 12, fontSize: 14, fontWeight: '500' },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    favoriteButton: { marginRight: 16, padding: 4 },
+    content: { padding: 16, paddingBottom: 40 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center' },
+    header: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+    logo: { width: 48, height: 48, borderRadius: 24 },
+    headerText: { marginLeft: 12 },
+    name: { fontSize: 20, fontWeight: '700', color: colors.text },
+    symbol: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+    priceBlock: { marginBottom: 16 },
+    price: { fontSize: 32, fontWeight: '700', color: colors.text },
+    priceChange: { fontSize: 15, marginTop: 4 },
+    changeRow: { marginBottom: 16 },
+    changeItem: {
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 14,
+      marginRight: 8,
+    },
+    changeLabel: { fontSize: 12, color: colors.textMuted, marginBottom: 4 },
+    changeValue: { fontSize: 13, fontWeight: '600' },
+    positive: { color: colors.success },
+    negative: { color: colors.danger },
+    chartSection: { marginBottom: 24 },
+    chartLoading: { height: 180, alignItems: 'center', justifyContent: 'center' },
+    rangeRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
+    rangeButton: {
+      flex: 1,
+      marginHorizontal: 2,
+      paddingVertical: 8,
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    rangeButtonSelected: { backgroundColor: colors.accentMuted },
+    rangeButtonText: { fontSize: 13, fontWeight: '600', color: colors.textMuted },
+    rangeButtonTextSelected: { color: colors.accent },
+    statsGrid: {
+      borderRadius: 12,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 16,
+      marginBottom: 24,
+    },
+    statRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    statLabel: { fontSize: 14, color: colors.textMuted },
+    statValue: { fontSize: 14, fontWeight: '600', color: colors.text },
+    section: { marginBottom: 24 },
+    sectionTitle: { fontSize: 17, fontWeight: '700', marginBottom: 8, color: colors.text },
+    description: { fontSize: 14, lineHeight: 20, color: colors.text },
+    dateAdded: { fontSize: 13, color: colors.textMuted, marginTop: 8 },
+    tagsRow: { marginTop: 12 },
+    tag: {
+      backgroundColor: colors.accentMuted,
+      borderRadius: 16,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      marginRight: 8,
+    },
+    tagText: { fontSize: 12, color: colors.accentOnMuted },
+    linkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    linkLabel: { flex: 1, marginLeft: 12, fontSize: 14, fontWeight: '500', color: colors.text },
+  });
+}

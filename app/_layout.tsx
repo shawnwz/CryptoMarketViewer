@@ -1,16 +1,18 @@
-import { Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
 import { FavoriteListsProvider } from '../contexts/FavoriteListsContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
+import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 
 function RootNavigator() {
   const { session, loading } = useAuth();
+  const { colors } = useTheme();
 
   if (loading) {
     return (
-      <View style={styles.center}>
+      <View style={[styles.center, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -32,16 +34,39 @@ function RootNavigator() {
   );
 }
 
+function ThemedApp() {
+  const { scheme, colors } = useTheme();
+
+  const navTheme =
+    scheme === 'dark'
+      ? {
+          ...DarkTheme,
+          colors: { ...DarkTheme.colors, background: colors.background, card: colors.background, text: colors.text, border: colors.border, primary: colors.accent },
+        }
+      : {
+          ...DefaultTheme,
+          colors: { ...DefaultTheme.colors, background: colors.background, card: colors.background, text: colors.text, border: colors.border, primary: colors.accent },
+        };
+
+  return (
+    <NavigationThemeProvider value={navTheme}>
+      <RootNavigator />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+    </NavigationThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <FavoriteListsProvider>
-          <RootNavigator />
-          <StatusBar style="auto" />
-        </FavoriteListsProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <FavoriteListsProvider>
+            <ThemedApp />
+          </FavoriteListsProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -15,8 +15,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CoinRow } from '../../components/CoinRow';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { CmcCoin, CmcCoinMapEntry, fetchCoinMap, fetchCoinQuotes } from '../../lib/coinmarketcap';
 import { addSearchTerm, clearSearchHistory, getSearchHistory } from '../../lib/searchHistory';
+import { ThemeColors } from '../../lib/theme';
 
 const MAX_RESULTS = 30;
 const DEBOUNCE_MS = 300;
@@ -24,6 +26,8 @@ const DEBOUNCE_MS = 300;
 export default function SearchScreen() {
   const { t } = useTranslation();
   const { currency } = useLanguage();
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [query, setQuery] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [coinMap, setCoinMap] = useState<CmcCoinMapEntry[]>([]);
@@ -109,11 +113,12 @@ export default function SearchScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.searchBarRow}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color="#999" style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={colors.textMuted} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder={t('common.searchCoinsPlaceholder')}
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted}
+            keyboardAppearance={scheme}
             value={query}
             onChangeText={setQuery}
             onSubmitEditing={() => Keyboard.dismiss()}
@@ -134,7 +139,7 @@ export default function SearchScreen() {
             <Text style={styles.historyTitle}>{t('search.searchHistory')}</Text>
             {history.length > 0 ? (
               <Pressable onPress={handleClearHistory} hitSlop={8}>
-                <Ionicons name="trash-outline" size={20} color="#666" />
+                <Ionicons name="trash-outline" size={20} color={colors.textMuted} />
               </Pressable>
             ) : null}
           </View>
@@ -160,7 +165,7 @@ export default function SearchScreen() {
         </View>
       ) : results.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="search-outline" size={40} color="#ccc" />
+          <Ionicons name="search-outline" size={40} color={colors.textFaint} />
           <Text style={styles.emptyTitle}>{t('common.noCoinsFound')}</Text>
         </View>
       ) : (
@@ -177,47 +182,49 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  list: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center' },
-  emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12, color: '#888' },
-  searchBarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  searchBar: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 40,
-  },
-  searchIcon: { marginRight: 6 },
-  searchInput: { flex: 1, fontSize: 16, color: '#111', height: '100%' },
-  cancelText: { fontSize: 16, color: '#111' },
-  historySection: { paddingHorizontal: 16, paddingTop: 8 },
-  historyHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  historyTitle: { fontSize: 17, fontWeight: '700' },
-  emptyHistoryText: { color: '#999', fontSize: 14 },
-  historyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  historyChip: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  historyChipText: { fontSize: 14, color: '#333' },
-  separator: { height: 1, backgroundColor: '#eee', marginLeft: 16 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    list: { flex: 1 },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center' },
+    emptyTitle: { fontSize: 16, fontWeight: '600', marginTop: 12, color: colors.textMuted },
+    searchBarRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      gap: 12,
+    },
+    searchBar: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      height: 40,
+    },
+    searchIcon: { marginRight: 6 },
+    searchInput: { flex: 1, fontSize: 16, color: colors.text, height: '100%' },
+    cancelText: { fontSize: 16, color: colors.text },
+    historySection: { paddingHorizontal: 16, paddingTop: 8 },
+    historyHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    historyTitle: { fontSize: 17, fontWeight: '700', color: colors.text },
+    emptyHistoryText: { color: colors.textMuted, fontSize: 14 },
+    historyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    historyChip: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    historyChipText: { fontSize: 14, color: colors.text },
+    separator: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
+  });
+}

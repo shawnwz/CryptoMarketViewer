@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
+import { ThemeColors } from '../lib/theme';
 
 type Props = {
   visible: boolean;
@@ -22,6 +24,8 @@ export function TextPromptModal({
   onSubmit,
 }: Props) {
   const { t } = useTranslation();
+  const { colors, scheme } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [value, setValue] = useState(initialValue);
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,6 +48,8 @@ export function TextPromptModal({
           <Text style={styles.title}>{title}</Text>
           <TextInput
             style={styles.input}
+            placeholderTextColor={colors.textMuted}
+            keyboardAppearance={scheme}
             value={value}
             onChangeText={setValue}
             autoFocus
@@ -61,7 +67,7 @@ export function TextPromptModal({
               disabled={!value.trim() || submitting}
             >
               {submitting ? (
-                <ActivityIndicator color="#fff" size="small" />
+                <ActivityIndicator color={colors.onAccent} size="small" />
               ) : (
                 <Text style={styles.confirmButtonText}>{confirmLabel ?? t('common.save')}</Text>
               )}
@@ -73,23 +79,26 @@ export function TextPromptModal({
   );
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 24 },
-  card: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
-  title: { fontSize: 16, fontWeight: '700', marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    marginBottom: 16,
-  },
-  buttonRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
-  cancelButton: { paddingVertical: 10, paddingHorizontal: 12 },
-  cancelButtonText: { color: '#666', fontWeight: '600' },
-  confirmButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
-  confirmButtonDisabled: { opacity: 0.5 },
-  confirmButtonText: { color: '#fff', fontWeight: '600' },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: 24 },
+    card: { backgroundColor: colors.card, borderRadius: 12, padding: 20 },
+    title: { fontSize: 16, fontWeight: '700', marginBottom: 12, color: colors.text },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 8,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 15,
+      marginBottom: 16,
+      color: colors.text,
+    },
+    buttonRow: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
+    cancelButton: { paddingVertical: 10, paddingHorizontal: 12 },
+    cancelButtonText: { color: colors.textMuted, fontWeight: '600' },
+    confirmButton: { backgroundColor: colors.accent, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
+    confirmButtonDisabled: { opacity: 0.5 },
+    confirmButtonText: { color: colors.onAccent, fontWeight: '600' },
+  });
+}

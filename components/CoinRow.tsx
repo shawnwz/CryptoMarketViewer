@@ -1,13 +1,17 @@
 import { Link } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { CmcCoin, getCoinLogoUrl, getQuote } from '../lib/coinmarketcap';
 import { formatPercent, formatPrice } from '../lib/format';
+import { ThemeColors } from '../lib/theme';
 import { FavoriteButton } from './FavoriteButton';
 
 export function CoinRow({ coin, onPress }: { coin: CmcCoin; onPress?: () => void }) {
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const quote = getQuote(coin, currency);
   const [logoFailed, setLogoFailed] = useState(false);
 
@@ -41,31 +45,33 @@ export function CoinRow({ coin, onPress }: { coin: CmcCoin; onPress?: () => void
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#fff',
-  },
-  logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f0f0f0' },
-  logoFallback: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logoFallbackText: { fontSize: 12, fontWeight: '700', color: '#888' },
-  nameColumn: { flex: 1, marginLeft: 10 },
-  name: { fontSize: 15, fontWeight: '600' },
-  symbol: { fontSize: 13, color: '#888', marginTop: 2 },
-  priceColumn: { alignItems: 'flex-end' },
-  price: { fontSize: 15, fontWeight: '600' },
-  change: { fontSize: 13, marginTop: 2 },
-  positive: { color: '#16a34a' },
-  negative: { color: '#dc2626' },
-  star: { marginLeft: 12, padding: 4 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: colors.background,
+    },
+    logo: { width: 28, height: 28, borderRadius: 14, backgroundColor: colors.surface },
+    logoFallback: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logoFallbackText: { fontSize: 12, fontWeight: '700', color: colors.textMuted },
+    nameColumn: { flex: 1, marginLeft: 10 },
+    name: { fontSize: 15, fontWeight: '600', color: colors.text },
+    symbol: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+    priceColumn: { alignItems: 'flex-end' },
+    price: { fontSize: 15, fontWeight: '600', color: colors.text },
+    change: { fontSize: 13, marginTop: 2 },
+    positive: { color: colors.success },
+    negative: { color: colors.danger },
+    star: { marginLeft: 12, padding: 4 },
+  });
+}

@@ -1,15 +1,19 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { CoinRow } from '../../components/CoinRow';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { CmcCoin, fetchCoinListings } from '../../lib/coinmarketcap';
+import { ThemeColors } from '../../lib/theme';
 
 const PAGE_SIZE = 10;
 
 export default function MarketScreen() {
   const { t } = useTranslation();
   const { currency } = useLanguage();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [coins, setCoins] = useState<CmcCoin[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -93,15 +97,19 @@ export default function MarketScreen() {
         ) : null
       }
       contentContainerStyle={coins.length === 0 ? styles.center : undefined}
+      style={styles.list}
     />
   );
 }
 
-const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff', padding: 24 },
-  errorText: { color: '#dc2626', textAlign: 'center', marginBottom: 16 },
-  retryButton: { backgroundColor: '#2563eb', borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
-  retryButtonText: { color: '#fff', fontWeight: '600' },
-  separator: { height: 1, backgroundColor: '#eee', marginLeft: 16 },
-  footer: { paddingVertical: 20 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    list: { backgroundColor: colors.background },
+    center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background, padding: 24 },
+    errorText: { color: colors.danger, textAlign: 'center', marginBottom: 16 },
+    retryButton: { backgroundColor: colors.accent, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 20 },
+    retryButtonText: { color: colors.onAccent, fontWeight: '600' },
+    separator: { height: 1, backgroundColor: colors.border, marginLeft: 16 },
+    footer: { paddingVertical: 20 },
+  });
+}

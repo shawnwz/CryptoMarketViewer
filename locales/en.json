@@ -33,7 +33,13 @@
     "title": "Settings",
     "loggedInAs": "Logged in as {{email}}",
     "logOut": "Log out",
-    "language": "Language"
+    "language": "Language",
+    "appearance": "Appearance"
+  },
+  "theme": {
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
   },
   "market": {
     "failedToLoad": "Failed to load cryptocurrencies",

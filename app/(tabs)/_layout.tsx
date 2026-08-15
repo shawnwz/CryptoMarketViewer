@@ -1,11 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+import { ThemeColors } from '../../lib/theme';
 
 export default function TabsLayout() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <Tabs
@@ -17,10 +22,10 @@ export default function TabsLayout() {
             hitSlop={8}
             style={styles.settingsButton}
           >
-            <Ionicons name="settings-outline" size={24} color="#111" />
+            <Ionicons name="settings-outline" size={24} color={colors.text} />
           </Pressable>
         ),
-        tabBarActiveTintColor: '#2563eb',
+        tabBarActiveTintColor: colors.accent,
       }}
     >
       <Tabs.Screen
@@ -67,7 +72,9 @@ export default function TabsLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  logo: { fontSize: 16, fontWeight: '800', letterSpacing: 0.5, marginLeft: 16 },
-  settingsButton: { marginRight: 16, padding: 4 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    logo: { fontSize: 16, fontWeight: '800', letterSpacing: 0.5, marginLeft: 16, color: colors.text },
+    settingsButton: { marginRight: 16, padding: 4 },
+  });
+}
