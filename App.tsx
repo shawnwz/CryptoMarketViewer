@@ -1,5 +1,5 @@
 import { ExpoRoot } from 'expo-router';
 
 export default function App() {
-  return <ExpoRoot context={(require as any).context('./app', true)} />;
+  return <ExpoRoot context={(require as any).context('./app', true)} location="/" />;
 }

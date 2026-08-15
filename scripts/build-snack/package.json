@@ -1,0 +1,12 @@
+{
+  "name": "build-snack",
+  "private": true,
+  "type": "module",
+  "description": "Publishes ../.. (CryptoMarketViewer) as an Expo Snack via snack-sdk. See build.mjs for why.",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "snack-sdk": "^6.6.2"
+  }
+}
