@@ -1,12 +1,4 @@
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error(
-    'Missing Supabase env vars. Copy .env.example to .env and fill in ' +
-      'EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY, then restart the dev server.'
-  );
-}
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from './config';
 
 // Requests go through the api-proxy Edge Function so the CryptoNews key
 // stays server-side instead of being bundled into the shipped app.
