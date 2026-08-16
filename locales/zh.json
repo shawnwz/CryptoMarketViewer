@@ -34,7 +34,8 @@
     "loggedInAs": "已登录：{{email}}",
     "logOut": "退出登录",
     "language": "语言",
-    "appearance": "外观"
+    "appearance": "外观",
+    "version": "版本 {{version}}"
   },
   "theme": {
     "system": "系统",

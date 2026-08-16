@@ -34,7 +34,8 @@
     "loggedInAs": "{{email}} でログイン中",
     "logOut": "ログアウト",
     "language": "言語",
-    "appearance": "外観"
+    "appearance": "外観",
+    "version": "バージョン {{version}}"
   },
   "theme": {
     "system": "システム",

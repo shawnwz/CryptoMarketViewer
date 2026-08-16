@@ -34,7 +34,8 @@
     "loggedInAs": "Logged in as {{email}}",
     "logOut": "Log out",
     "language": "Language",
-    "appearance": "Appearance"
+    "appearance": "Appearance",
+    "version": "Version {{version}}"
   },
   "theme": {
     "system": "System",

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { Stack, useRouter } from 'expo-router';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,6 +43,8 @@ export default function SettingsScreen() {
         <Text style={styles.sectionLabel}>{t('settings.appearance')}</Text>
         <ThemePicker />
       </View>
+
+      <Text style={styles.version}>{t('settings.version', { version: Constants.expoConfig?.version })}</Text>
     </View>
   );
 }
@@ -55,5 +58,6 @@ function createStyles(colors: ThemeColors) {
     closeButton: { marginLeft: 16, padding: 4 },
     section: { marginTop: 40, alignItems: 'center', width: '100%' },
     sectionLabel: { fontSize: 13, color: colors.textMuted, marginBottom: 12 },
+    version: { marginTop: 'auto', paddingTop: 24, fontSize: 12, color: colors.textMuted },
   });
 }
