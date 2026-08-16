@@ -25,7 +25,9 @@ export default function TabsLayout() {
             <Ionicons name="settings-outline" size={24} color={colors.text} />
           </Pressable>
         ),
+        headerStyle: { backgroundColor: colors.background },
         tabBarActiveTintColor: colors.accent,
+        tabBarStyle: { backgroundColor: colors.background },
       }}
     >
       <Tabs.Screen

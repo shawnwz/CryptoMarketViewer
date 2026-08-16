@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 812" font-family="Helvetica, Arial, sans-serif">
+  <rect x="1" y="1" width="373" height="810" rx="28" fill="white" stroke="black" stroke-width="3"/>
+
+  <!-- header -->
+  <text x="20" y="55" font-size="10" fill="#888">CRYPTOMARKETVIEWER</text>
+  <text x="187" y="58" font-size="16" text-anchor="middle" font-weight="bold">Market</text>
+  <circle cx="345" cy="52" r="12" fill="none" stroke="black"/>
+  <circle cx="345" cy="52" r="4" fill="none" stroke="black"/>
+  <line x1="0" y1="76" x2="375" y2="76" stroke="black" stroke-width="1"/>
+
+  <!-- rows -->
+  <g id="rows">
+    <!-- row template repeated manually at different y -->
+  </g>
+
+  <!-- row 1 -->
+  <circle cx="45" cy="112" r="14" fill="none" stroke="black"/>
+  <rect x="70" y="103" width="70" height="8" fill="#333"/>
+  <rect x="70" y="115" width="35" height="6" fill="#bbb"/>
+  <rect x="270" y="103" width="55" height="8" fill="#333"/>
+  <rect x="285" y="115" width="40" height="6" fill="#bbb"/>
+  <path d="M0,-6 L1.8,-1.9 L6,-1.9 L2.7,1.1 L3.7,5.9 L0,3.2 L-3.7,5.9 L-2.7,1.1 L-6,-1.9 L-1.8,-1.9 Z" fill="none" stroke="black" stroke-width="1" transform="translate(345,106)"/>
+  <line x1="20" y1="138" x2="355" y2="138" stroke="#ddd" stroke-width="1"/>
+
+  <!-- row 2 -->
+  <circle cx="45" cy="164" r="14" fill="none" stroke="black"/>
+  <rect x="70" y="155" width="90" height="8" fill="#333"/>
+  <rect x="70" y="167" width="30" height="6" fill="#bbb"/>
+  <rect x="265" y="155" width="60" height="8" fill="#333"/>
+  <rect x="285" y="167" width="40" height="6" fill="#bbb"/>
+  <path d="M0,-6 L1.8,-1.9 L6,-1.9 L2.7,1.1 L3.7,5.9 L0,3.2 L-3.7,5.9 L-2.7,1.1 L-6,-1.9 L-1.8,-1.9 Z" fill="none" stroke="black" stroke-width="1" transform="translate(345,158)"/>
+  <line x1="20" y1="190" x2="355" y2="190" stroke="#ddd" stroke-width="1"/>
+
+  <!-- row 3 -->
+  <circle cx="45" cy="216" r="14" fill="none" stroke="black"/>
+  <rect x="70" y="207" width="60" height="8" fill="#333"/>
+  <rect x="70" y="219" width="35" height="6" fill="#bbb"/>
+  <rect x="272" y="207" width="53" height="8" fill="#333"/>
+  <rect x="285" y="219" width="40" height="6" fill="#bbb"/>
+  <path d="M0,-6 L1.8,-1.9 L6,-1.9 L2.7,1.1 L3.7,5.9 L0,3.2 L-3.7,5.9 L-2.7,1.1 L-6,-1.9 L-1.8,-1.9 Z" fill="none" stroke="black" stroke-width="1" transform="translate(345,210)"/>
+  <line x1="20" y1="242" x2="355" y2="242" stroke="#ddd" stroke-width="1"/>
+
+  <!-- row 4 -->
+  <circle cx="45" cy="268" r="14" fill="none" stroke="black"/>
+  <rect x="70" y="259" width="80" height="8" fill="#333"/>
+  <rect x="70" y="271" width="30" height="6" fill="#bbb"/>
+  <rect x="268" y="259" width="57" height="8" fill="#333"/>
+  <rect x="285" y="271" width="40" height="6" fill="#bbb"/>
+  <path d="M0,-6 L1.8,-1.9 L6,-1.9 L2.7,1.1 L3.7,5.9 L0,3.2 L-3.7,5.9 L-2.7,1.1 L-6,-1.9 L-1.8,-1.9 Z" fill="none" stroke="black" stroke-width="1" transform="translate(345,262)"/>
+  <line x1="20" y1="294" x2="355" y2="294" stroke="#ddd" stroke-width="1"/>
+
+  <!-- row 5 -->
+  <circle cx="45" cy="320" r="14" fill="none" stroke="black"/>
+  <rect x="70" y="311" width="65" height="8" fill="#333"/>
+  <rect x="70" y="323" width="35" height="6" fill="#bbb"/>
+  <rect x="270" y="311" width="55" height="8" fill="#333"/>
+  <rect x="285" y="323" width="40" height="6" fill="#bbb"/>
+  <path d="M0,-6 L1.8,-1.9 L6,-1.9 L2.7,1.1 L3.7,5.9 L0,3.2 L-3.7,5.9 L-2.7,1.1 L-6,-1.9 L-1.8,-1.9 Z" fill="none" stroke="black" stroke-width="1" transform="translate(345,314)"/>
+  <line x1="20" y1="346" x2="355" y2="346" stroke="#ddd" stroke-width="1"/>
+
+  <!-- row 6 (partially cut off, implying scroll) -->
+  <circle cx="45" cy="372" r="14" fill="none" stroke="black"/>
+  <rect x="70" y="363" width="75" height="8" fill="#333"/>
+  <rect x="70" y="375" width="30" height="6" fill="#bbb"/>
+  <rect x="270" y="363" width="55" height="8" fill="#333"/>
+  <rect x="285" y="375" width="40" height="6" fill="#bbb"/>
+
+  <!-- bottom tab bar -->
+  <line x1="0" y1="740" x2="375" y2="740" stroke="black" stroke-width="1"/>
+  <g font-size="9" text-anchor="middle" fill="#333">
+    <rect x="30" y="755" width="16" height="16" fill="none" stroke="black"/>
+    <text x="38" y="788">Market</text>
+
+    <circle cx="112" cy="763" r="8" fill="none" stroke="black"/>
+    <line x1="118" y1="769" x2="124" y2="775" stroke="black"/>
+    <text x="112" y="788">Search</text>
+
+    <path d="M187 755 l4 10 h-8 z" fill="none" stroke="black"/>
+    <text x="187" y="788">Favorites</text>
+
+    <rect x="253" y="755" width="16" height="14" fill="none" stroke="black"/>
+    <text x="261" y="788">News</text>
+
+    <rect x="328" y="755" width="16" height="14" rx="2" fill="none" stroke="black"/>
+    <text x="336" y="788">Portfolio</text>
+  </g>
+
+  <text x="187" y="810" font-size="11" text-anchor="middle" fill="#aaa">wireframe — market / coin list</text>
+</svg>
