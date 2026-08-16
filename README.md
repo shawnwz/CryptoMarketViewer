@@ -131,6 +131,27 @@ supabase/                 SQL migrations to run in the Supabase SQL editor
 
    > **Note:** web is not a supported target — `react-native-web` isn't installed, so `npm run web` won't start. This app targets iOS/Android only.
 
+## Testing
+
+```bash
+npm test          # run once
+npm run test:watch
+```
+
+Tests live next to what they cover, under `__tests__/` (e.g. `lib/__tests__/format.test.ts`, `components/__tests__/CoinRow.test.tsx`). Uses Jest with Expo's `jest-expo` preset, plus `@testing-library/react-native` for the component tests.
+
+**Logic layer** (`lib/`) — pure functions, no rendering involved:
+- `lib/format.ts`: currency/percent/compact-number formatting, including locale-switching behavior
+- `lib/coinmarketcap.ts`: the `getQuote`/`getCoinLogoUrl` helpers, plus `cmcFetch`'s error-handling — the v3-string-vs-v2-number `error_code` normalization, and that failures surface the API's own `error_message` when present
+- `lib/i18n.ts`: `isSupportedLanguage`
+
+**Components** (`components/`) — a representative few, not full coverage, each showing a different testing approach:
+- `PriceChart`: the "not enough data" placeholder vs. the real chart, and that the line renders in the success vs. danger color depending on whether the price went up or down. `useTheme` is mocked directly (the component isn't the thing testing ThemeContext, so no need for a real provider).
+- `ThemePicker`: rendered inside a **real** `ThemeProvider`, verifying it actually switches and persists the preference to AsyncStorage — this component's whole job *is* to drive ThemeContext, so exercising the real one is the point.
+- `CoinRow`: the app's most-reused component (market list, search results, favorites), with routing (`expo-router`), currency (`LanguageContext`), and the favorites star (`FavoriteButton`) each swapped for a minimal stub — isolates CoinRow's own rendering logic (name/symbol/price/% change formatting and coloring, missing-quote fallback, correct link target) from its collaborators' internals.
+
+Screens aren't covered — they'd need mocks for Supabase, expo-router's full navigation context, and expo-secure-store, which is a bigger lift than component-level tests need.
+
 ## Deploying the `api-proxy` Edge Function
 
 CoinMarketCap and CryptoNews are called through a Supabase Edge Function (`supabase/functions/api-proxy`) instead of directly from the app, so their API keys never end up in the shipped bundle (unlike `EXPO_PUBLIC_*` vars, which do — see [API notes & limitations](#api-notes--limitations)). The function takes requests at `.../api-proxy/cmc/<path>` or `.../api-proxy/news/<path>`, attaches the right key server-side, and forwards them upstream.

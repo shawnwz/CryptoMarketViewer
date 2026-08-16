@@ -40,11 +40,15 @@ export function PriceChart({ data }: { data: CmcHistoricalPoint[] }) {
 
   return (
     <View>
-      <View style={styles.chartWrapper} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <View
+        testID="price-chart-wrapper"
+        style={styles.chartWrapper}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      >
         {width > 0 ? (
           <Svg width={width} height={CHART_HEIGHT}>
             <Path d={areaPath} fill={color} fillOpacity={0.12} stroke="none" />
-            <Path d={linePath} stroke={color} strokeWidth={2} fill="none" />
+            <Path testID="price-chart-line" d={linePath} stroke={color} strokeWidth={2} fill="none" />
           </Svg>
         ) : null}
       </View>
